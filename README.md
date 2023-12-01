@@ -387,3 +387,34 @@ void SilabsSensors::ActionTriggered(AppEvent * aEvent)
 ```
 
 You should now be able to build and test the Matter Accessory Device!
+
+## Generate Matter Onboarding Codes (QR Code and Manual Pairing Code)
+
+```
+// Generate the QR Code
+chip-tool payload generate-qrcode \
+  --discriminator 3131 --setup-pin-code 20201111 \
+  --vendor-id 0xFFF1 --product-id 0x8004 \
+  --version 0 --commissioning-mode 0 \
+  --rendezvous 2
+```
+
+```
+// Generates the short manual pairing code (11-digit).
+chip-tool payload generate-manualcode \
+  --discriminator 3131 \
+  --setup-pin-code 20201111 \
+  --version 0 --commissioning-mode 0
+```
+
+```
+// To generate a long manual pairing code (21-digit) that includes both the vendor ID and product ID,
+// --commissioning-mode parameter must be set to either 1 or 2, indicating a non-standard commissioning flow.
+chip-tool payload generate-manualcode \
+  --discriminator 3131 \
+  --setup-pin-code 20201111 \
+  --vendor-id 0xFFF1 \
+  --product-id 0x8004 \
+  --version 0 \
+  --commissioning-mode 1
+```
