@@ -393,9 +393,12 @@ You should now be able to build and test the Matter Accessory Device!
 ```
 // Generate the QR Code
 chip-tool payload generate-qrcode \
-  --discriminator 3131 --setup-pin-code 20201111 \
-  --vendor-id 0xFFF1 --product-id 0x8004 \
-  --version 0 --commissioning-mode 0 \
+  --discriminator 3131 \
+  --setup-pin-code 20201111 \
+  --vendor-id 0xFFF1 \
+  --product-id 0x8004 \
+  --version 0 \
+  --commissioning-mode 0 \
   --rendezvous 2
 ```
 
