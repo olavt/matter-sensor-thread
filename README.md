@@ -415,27 +415,6 @@ void SilabsSensors::ActionTriggered(AppEvent * aEvent)
 }
 ```
 
-## Update ZAP file to meet requirements in the Matter 1.2 Standard Specification
-
-The Silicon Labs "Matter - SoC Sensor over Thread" example project seems to lack several requirements that are specified in the Matter 1.2 Specification, so we need to modify the ZAP file to be more in-line with the standard.
-
-Open the config->common folder and open the file "temperature-thread-app.zap".
-
-### Endpoint Composition
-
-The requirements are described in Matter-1.2-Core-Specification.pdf.
-
-Requrements:
-
-* Endpoint composition SHALL be indicated by these Descriptor cluster attributes:
-    * DeviceTypeList SHALL list the device type(s) that the endpoint supports.
-    * PartsList SHALL indicate endpoints as required for each device type in the DeviceTypeList.
-        * The PartsList of the Root Node endpoint SHALL list all the endpoints on the node except the Root Node endpoint itself, as required by the Root Node device type.
-        * The PartsList of any endpoint having the Aggregator device type SHALL list all the endpoints representing the devices aggregated by this Aggregator, as required by the Aggregator device type.
-
-
-
-
 You should now be able to build and test the Matter Accessory Device!
 
 ## Generate Matter Onboarding Codes (QR Code and Manual Pairing Code)
