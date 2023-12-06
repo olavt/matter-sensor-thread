@@ -25,13 +25,33 @@ Start by creating a new project in Simplicity Studio V5 by selecting the "Matter
 
 This is a good starting point as it already implements a fully functional Matter over Thread device. Unfortunately it only supports some simulated sensors and not the actual sensors found on the develkopment kit board.
 
+## Change the default sensor type
+
+When you create the sensor project it defaults to Occupancy Sensor. To switch between
+the sensors, uninstall the 'Matter Occupancy Sensor'/current sensor component and install the
+respective sensor component to enable it. One sensor component should be enabled for the app to build.
+
+Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
+
+Navigate to "Silicon Labs Matter v2.1.1->Platform->Sensors:
+
+![Sensor Components](./images/platform-sensor-components.png)
+
+Select the "Matter Temperature Sensor" component and click "Install".
+
+When asked click on "Replace Matter Occupancy Sensor with Matter Temperature Sensor":
+
+![Replace Matter Occupancy Sensor](./images/replace-occupancy-sensor-component.png)
+
+Select "Temperature Sensor Support" and click "Install".
+
 ## Add support for on-board sensors
 
 Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
 
 ### Enable the hardware sensors
 
-Locate the "Board Control" component under Platform->Board, select it and click on the Settings icon.
+Locate the "Board Control" component under Platform->Board, select it and click on the Configure icon.
 
 ![Board Control](./images/platform-board-control.png)
 
@@ -44,14 +64,23 @@ Make sure the relevant sensors are enabled:
 Install the following drivers found under Platform->Board Drivers:
 
 * BMP3xx - Pressure Sensor
+* Pressure device driver for BMP3XX
 * Si70xx - Temperature/Humidity Sensor
 * VEML6035 - Ambient Light Sensor
 
-### Add Clusters for added sensor types
+### Add Matter Endpoints and Clusters for added sensor types
 
 Open the config->common folder and open the file "temperature-thread-app.zap".
 
-Select "Endpoint - 1" in the ZCL editor. Open the "Measurement & Sensing" Cluster and enable the clusters as shown below:
+Select "Endpoint - 1" in the ZCL editor and select "Edit" as shown below.
+
+![Select Edit Endpoint](./images/select-edit-endpoint.png)
+
+Select the "Device" dropdown and add "Matter Humidity Sensor", "Matter Light Sensor" and "Matter Pressure Sensor". Click the "Save" button.
+
+![Edit Endpoint](./images/edit-endpoint.png)
+
+Open the "Measurement & Sensing" Cluster and enable the clusters as shown below:
 
 ![Measurement & Sensing Clusters](./images/zcl-measurement-sensing-clusters.png)
 
@@ -59,7 +88,7 @@ Select "Endpoint - 1" in the ZCL editor. Open the "Measurement & Sensing" Cluste
 
 #### Create C++ classes for the BMP3xx - Pressure Sensor
 
-Locate the "src" folder in the Simplicity Studio project, right click on it and select "New>Header File". Enter "BMP3xxPressureSensor.h" as the filname and make sure the "Default C++ header template" is selected and click "Finish".
+Locate the "include" folder in the Simplicity Studio project, right click on it and select "New>Header File". Enter "BMP3xxPressureSensor.h" as the filname and make sure the "Default C++ header template" is selected and click "Finish".
 
 Paste the following code into the new header file:
 
@@ -130,7 +159,7 @@ bool BMP3xxPressureSensor::MeasurePressure(float* pressureResult)
 
 #### Create C++ classes for the Si70xx - Temperature/Humidity Sensor
 
-Locate the "src" folder in the Simplicity Studio project, right click on it and select "New>Header File". Enter "Si70xxTemperatureHumiditySensor.h" as the filname and make sure the "Default C++ header template" is selected and click "Finish".
+Locate the "Include" folder in the Simplicity Studio project, right click on it and select "New>Header File". Enter "Si70xxTemperatureHumiditySensor.h" as the filname and make sure the "Default C++ header template" is selected and click "Finish".
 
 Paste the following code into the new header file:
 
@@ -228,7 +257,7 @@ bool Si70xxTemperatureHumiditySensor::MeasureTemperature(float* temperature)
 
 #### Create C++ classes for the VEML6035 - Ambient Light Sensor
 
-Locate the "src" folder in the Simplicity Studio project, right click on it and select "New>Header File". Enter "VEML6035AmbientLightSensor.h" as the filname and make sure the "Default C++ header template" is selected and click "Finish".
+Locate the "include" folder in the Simplicity Studio project, right click on it and select "New>Header File". Enter "VEML6035AmbientLightSensor.h" as the filname and make sure the "Default C++ header template" is selected and click "Finish".
 
 Paste the following code into the new header file:
 
@@ -385,6 +414,27 @@ void SilabsSensors::ActionTriggered(AppEvent * aEvent)
     }
 }
 ```
+
+## Update ZAP file to meet requirements in the Matter 1.2 Standard Specification
+
+The Silicon Labs "Matter - SoC Sensor over Thread" example project seems to lack several requirements that are specified in the Matter 1.2 Specification, so we need to modify the ZAP file to be more in-line with the standard.
+
+Open the config->common folder and open the file "temperature-thread-app.zap".
+
+### Endpoint Composition
+
+The requirements are described in Matter-1.2-Core-Specification.pdf.
+
+Requrements:
+
+* Endpoint composition SHALL be indicated by these Descriptor cluster attributes:
+    * DeviceTypeList SHALL list the device type(s) that the endpoint supports.
+    * PartsList SHALL indicate endpoints as required for each device type in the DeviceTypeList.
+        * The PartsList of the Root Node endpoint SHALL list all the endpoints on the node except the Root Node endpoint itself, as required by the Root Node device type.
+        * The PartsList of any endpoint having the Aggregator device type SHALL list all the endpoints representing the devices aggregated by this Aggregator, as required by the Aggregator device type.
+
+
+
 
 You should now be able to build and test the Matter Accessory Device!
 
