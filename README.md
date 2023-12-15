@@ -33,9 +33,11 @@ respective sensor component to enable it. One sensor component should be enabled
 
 Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
 
-Navigate to "Silicon Labs Matter v2.1.1->Platform->Sensors:
+Navigate to "Silicon Labs Matter v2.2.0->Platform->Sensors:
 
 ![Sensor Components](./images/platform-sensor-components.png)
+
+Select the "Matter Temperature Sensor" component and click "Install".
 
 Select the "Matter Temperature Sensor" component and click "Install".
 
@@ -44,6 +46,12 @@ When asked click on "Replace Matter Occupancy Sensor with Matter Temperature Sen
 ![Replace Matter Occupancy Sensor](./images/replace-occupancy-sensor-component.png)
 
 Select "Temperature Sensor Support" and click "Install".
+
+Select the "Temperature Sensor Support" component and click "Install".
+
+Select "Matter Occupancy Sensor" and click "Uninstall".
+
+
 
 ## Add support for on-board sensors
 
