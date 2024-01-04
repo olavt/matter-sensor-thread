@@ -5,7 +5,7 @@
 
 This article shows how to modify the "Matter - SoC Sensor over Thread" example project with support for some of the sensors found on the Silicon Labs EFR32xG24 Dev Kit Board.
 
-This article is based on Silicon Labs Gecko SDK version 4.3.2 with Silicon Labs Matter 2.1.1 extensions.
+This article is based on Silicon Labs Gecko SDK version 4.4.0 with Silicon Labs Matter 2.2.0 extensions.
 
 ![Silicon Labs EFR32xG24 Dev Kit Board](./images/xg24-dk2601b.png)
 
@@ -15,7 +15,7 @@ This article is based on Silicon Labs Gecko SDK version 4.3.2 with Silicon Labs 
 - Install Simplicity Studio V5 from Silicon Labs.
 - Silicon Labs EFR32xG24 Dev Kit Board (BRD2601B).
 
-This article assumes that you have already installed Simplicity Studio V5 and the Gecko SDK 4.3.2
+This article assumes that you have already installed Simplicity Studio V5 and the Gecko SDK 4.4.0.
 
 ## Create the initial project based on the "Matter - SoC Sensor over Thread" example project
 
@@ -83,6 +83,37 @@ Open the config->common folder and open the file "temperature-thread-app.zap".
 Select "Endpoint - 1" in the ZCL editor and select "Edit" as shown below.
 
 ![Select Edit Endpoint](./images/select-edit-endpoint.png)
+
+Endpoint-1 should already be correctly setup for a Temperature sensor as shown below:
+
+![Select Edit Endpoint](./images/endpoint-1.png)
+
+Click Cancel.
+
+#### Add Endpoint for Humidity Sensor
+
+Click on "+ ADD ENDPOINT" to add another endpoint.
+
+Fill in the information shown below and click "Save".
+
+![Create Endpoint](./images/create-endpoint-2.png)
+
+#### Add Endpoint for Light Sensor
+
+Click on "+ ADD ENDPOINT" to add another endpoint.
+
+Fill in the information shown below and click "Save".
+
+![Create Endpoint](./images/create-endpoint-3.png)
+
+#### Add Endpoint for Pressure Sensor
+
+Click on "+ ADD ENDPOINT" to add another endpoint.
+
+Fill in the information shown below and click "Save".
+
+![Create Endpoint](./images/create-endpoint-4.png)
+
 
 Select the "Device" dropdown and add "Matter Humidity Sensor", "Matter Light Sensor" and "Matter Pressure Sensor". Click the "Save" button.
 
@@ -336,13 +367,17 @@ Replace the content of the source file with the following code:
 ```
 #include "SensorsCallbacks.h"
 #include "AppTask.h"
-#include "BMP3xxPressureSensor.h"
-#include "Si70xxTemperatureHumiditySensor.h"
-#include "VEML6035AmbientLightSensor.h"
+#include <platform/silabs/platformAbstraction/SilabsPlatform.h>
 
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <app-common/zap-generated/ids/Attributes.h>
 #include <app-common/zap-generated/ids/Clusters.h>
+
+#include "BMP3xxPressureSensor.h"
+#include "Si70xxTemperatureHumiditySensor.h"
+#include "VEML6035AmbientLightSensor.h"
+
+using namespace ::chip::DeviceLayer::Silabs;
 
 BMP3xxPressureSensor pressureSensor;
 Si70xxTemperatureHumiditySensor temperatureHumiditySensor;
@@ -357,44 +392,44 @@ void SilabsSensors::InitSensor(void)
 
 void UpdateRelativeHumidityMeasurement()
 {
-  float relativeHumidity;
-  if (temperatureHumiditySensor.MeasureRelativeHumidity(&relativeHumidity))
+  float measuredRelativeHumidity;
+  if (temperatureHumiditySensor.MeasureRelativeHumidity(&measuredRelativeHumidity))
   {
       chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(1, relativeHumidity * 100);
+      chip::app::Clusters::RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(2, measuredRelativeHumidity * 100);
       chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
 
 void UpdateIlluminanceMeasurementMeasurement()
 {
-  float lux;
-  if (illuminanceSensor.MeasureIllumination(&lux))
+  float measuredLux;
+  if (illuminanceSensor.MeasureIllumination(&measuredLux))
   {
       chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::IlluminanceMeasurement::Attributes::MeasuredValue::Set(1, lux);
+      chip::app::Clusters::IlluminanceMeasurement::Attributes::MeasuredValue::Set(3, measuredLux);
       chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
 
 void UpdateTemperatureMeasurement()
 {
-  float temperature;
-  if (temperatureHumiditySensor.MeasureTemperature(&temperature))
+  float measuredTemperature;
+  if (temperatureHumiditySensor.MeasureTemperature(&measuredTemperature))
   {
       chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(1, temperature * 100);
+      chip::app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(1, measuredTemperature * 100);
       chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
 
 void UpdatePressureMeasurement()
 {
-  float pressure;
-  if (pressureSensor.MeasurePressure(&pressure))
+  float measuredPressure;
+  if (pressureSensor.MeasurePressure(&measuredPressure))
   {
       chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(1, pressure * 10);
+      chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(4, measuredPressure * 10);
       chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
@@ -409,17 +444,17 @@ void UpdateMeasurements()
 
 void SilabsSensors::ActionTriggered(AppEvent * aEvent)
 {
-    if (aEvent->Type == AppEvent::kEventType_Button)
-    {
-        if(aEvent->ButtonEvent.Action == SL_SIMPLE_BUTTON_PRESSED)
-        {
-            UpdateMeasurements();
-        }
-    }
-    else if (aEvent->Type == AppEvent::kEventType_Timer)
-    {
-        UpdateMeasurements();
-    }
+  if (aEvent->Type == AppEvent::kEventType_Button)
+  {
+      if (aEvent->ButtonEvent.Action == static_cast<uint8_t>(SilabsPlatform::ButtonAction::ButtonPressed))
+      {
+          UpdateMeasurements();
+      }
+  }
+  else if (aEvent->Type == AppEvent::kEventType_Timer)
+  {
+      UpdateMeasurements();
+  }
 }
 ```
 
