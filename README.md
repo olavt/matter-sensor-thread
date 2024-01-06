@@ -401,7 +401,7 @@ void UpdateRelativeHumidityMeasurement()
   }
 }
 
-void UpdateIlluminanceMeasurementMeasurement()
+void UpdateIlluminanceMeasurement()
 {
   float measuredLux;
   if (illuminanceSensor.MeasureIllumination(&measuredLux))
@@ -436,7 +436,7 @@ void UpdatePressureMeasurement()
 
 void UpdateMeasurements()
 {
-  UpdateIlluminanceMeasurementMeasurement();
+  UpdateIlluminanceMeasurement();
   UpdateRelativeHumidityMeasurement();
   UpdateTemperatureMeasurement();
   UpdatePressureMeasurement();
@@ -459,6 +459,42 @@ void SilabsSensors::ActionTriggered(AppEvent * aEvent)
 ```
 
 You should now be able to build and test the Matter Accessory Device!
+
+## Add support for a CO2 sensor using UART (serial communication)
+
+To be able to connect the CO2 sensor to the EFR32xG24 Dev Kit Board, I soldered two 10-pin headers to the EXP headers on the board.
+
+Connect TX from the CO2 sensor to RX on the EFR32xG24 Dev Kit Board and RX to TX. My CO2 sensor use 5V, so I connect those together and GND. It then looks like the photo on top of this article.
+
+### Resolve conflict with "vcom"
+
+There are no additional hardware resources availabe for additional RX / TX UART pins, so the existing use of these needs to be removed first. They are used by "vcom", which was added to support "Matter Shell".
+
+#### Remove the Software Component Matter Shell
+
+Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
+
+Search for "Matter Shell" and Uninstall it.
+
+### Add support for UART to the project
+
+Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
+
+Locate "Services->IO Stream->Driver->IO Stream: EUSART", select it and click "Install"
+
+![IO Stream: USART](./images/io_stream_eusart_install.png)
+
+Select the name "exp" and click Done.
+
+When the installation is completed click on "Instances":
+
+![IO Stream: USART](./images/instances.png)
+
+Click on the gear icon to the right of "exp":
+
+
+
+Make sure the settings are correct for  your CO2 sensor. I changed only the Baud rate to 9600.
 
 ## Generate Matter Onboarding Codes (QR Code and Manual Pairing Code)
 
