@@ -492,9 +492,27 @@ When the installation is completed click on "Instances":
 
 Click on the gear icon to the right of "exp":
 
-
-
 Make sure the settings are correct for  your CO2 sensor. I changed only the Baud rate to 9600.
+
+### Add Matter cluster support for CO2-sensor
+
+Open the config->common folder and open the file "temperature-thread-app.zap".
+
+#### Add Endpoint for CO2 Sensor
+
+Click on "+ ADD ENDPOINT" to add another endpoint.
+
+Fill in the information shown below and click "Save".
+
+![Create Endpoint](./images/create-endpoint-5.png)
+
+With the new enpoint selected, click on "Measurement & Sensing" in the list of clusters.
+
+![Endpoint 5 clusters](./images/endpoint-5-clusters.png)
+
+The "Air Quality" and "Carbon Dioxide Concentration Measurement" should be "Server" enabled. The rest should be "Not Enabled".
+
+Now Build the project
 
 ## Generate Matter Onboarding Codes (QR Code and Manual Pairing Code)
 
