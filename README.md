@@ -88,6 +88,14 @@ Endpoint-1 should already be correctly setup for a Temperature sensor as shown b
 
 ![Select Edit Endpoint](./images/endpoint-1.png)
 
+In the list of clusters on the right panel, expand the "Measurement & Sensing" section and find the "Temperature Measurement" cluster and click on the settings icon.
+
+![Measurement & Sensing](./images/measurement-sensing.png)
+
+Click on the NULL button in the Default field for the MeasuredValue attribute.
+
+![MeasuredValue Default](./images/measured-value-default.png)
+
 Click Cancel.
 
 #### Add Endpoint for Humidity Sensor
@@ -113,15 +121,6 @@ Click on "+ ADD ENDPOINT" to add another endpoint.
 Fill in the information shown below and click "Save".
 
 ![Create Endpoint](./images/create-endpoint-4.png)
-
-
-Select the "Device" dropdown and add "Matter Humidity Sensor", "Matter Light Sensor" and "Matter Pressure Sensor". Click the "Save" button.
-
-![Edit Endpoint](./images/edit-endpoint.png)
-
-Open the "Measurement & Sensing" Cluster and enable the clusters as shown below:
-
-![Measurement & Sensing Clusters](./images/zcl-measurement-sensing-clusters.png)
 
 ### Add C++ classes for the sensors
 
