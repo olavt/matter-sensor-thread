@@ -512,9 +512,25 @@ With the new enpoint selected, click on "Measurement & Sensing" in the list of c
 
 The "Air Quality" and "Carbon Dioxide Concentration Measurement" should be "Server" enabled. The rest should be "Not Enabled".
 
+Configure properties for the "Carbon Dioxide Concentration Measurement" cluster
+
+Click the Settings icon for the "Carbon Dioxide Concentration Measurement" cluster
+
+![Carbon Dioxide Concentration Measurement Cluster](./images/carbon-dioxide-concentration-measurement-cluster.png)
+
+Enable the "MeasuredValue" attribute.
+
+![Carbon Dioxide Concentration Measurement Cluster Attributes](./images/carbon-dioxide-concentration-measurement-attributes.png)
+
+Set the ClusterRevision attribute to the default value 3.
+
+![Carbon Dioxide Concentration Measurement ClusterRevision](./images/carbon-dioxide-concentration-measurement-cluster-revision.png)
+
 Now Build the project
 
 ## Generate Matter Onboarding Codes (QR Code and Manual Pairing Code)
+
+Note! The values used below are defined in "CHIPProjectConfig.h" found in the include folder of your project.
 
 ```
 // Generate the QR Code
