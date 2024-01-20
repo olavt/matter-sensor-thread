@@ -527,28 +527,6 @@ Set the ClusterRevision attribute to the default value 3.
 
 Now Build the project
 
-## Viewing debug logs
-
-You can view the debug log statements using "J-Link RTT Viewer". You can download J-Link RTT Viewer, which is included in the "J-Link Software and Documentation pack" here:
-
-https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack
-
-### Matter Core Components Settings
-
-You can check the settings for the debug outputs under "Matter Core Components" under "Software Components" in your project.
-
-![Matter Core Components Settings](./images/matter-core-components-settings.png)
-
-### Running J-Link RTT Viewer
-
-Make sure your device is  connected to an USB port and the software on it is running. Start the J-Link RTT Viewer and select "Connect" from the File menu. 
-
-When the dialog for selecting the emulator to connect to, select entry #1 like shown below.
-
-![J-Link Select Emulator](./images/j-link-select-emulator.png)
-
-The debug log messages should now appear in the terminal windowws of the J-Link RTT Viewer.
-
 ## Generate Matter Onboarding Codes (QR Code and Manual Pairing Code)
 
 Note! The values used below are defined in "CHIPProjectConfig.h" found in the include folder of your project.
