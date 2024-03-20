@@ -17,6 +17,22 @@ This article is based on Silicon Labs Gecko SDK version 4.4.0 with Silicon Labs 
 
 This article assumes that you have already installed Simplicity Studio V5 and the Gecko SDK 4.4.0.
 
+## Prepare the bootloader for Over-The-Air firmware upgrades
+
+See this article for more details on Creating a Gecko Bootloader for Use in Matter OTA Software Update: https://docs.silabs.com/matter/2.0.0/matter-overview-guides/ota-bootloader
+
+Find the "Bootloader - SoC Internal Storage (single image on 1536kB device)" example project and create a new project from it. This bootloader is for the Silicon Labs xG24-DK2601B EFR32xG24 Dev Kit, which has 1536kB Flash.
+
+![Bootloader](./images/bootloader.png)
+
+Open the .slcp file in your bootloader project and select "SOFTWARE COMPONENTS".
+
+Install the "GBL Compression (LZMA)" component under Platform->Bootloader->Core:
+
+![GBL Compression (LZMA)](./images/bootloader-core-gbl-compression-lzma.png)
+
+Build the bootloader project, find the .s37 image file (under the Binaries folder) and flash it to your Silicon Labs Dev Kit.
+
 ## Create the initial project based on the "Matter - SoC Sensor over Thread" example project
 
 Start by creating a new project in Simplicity Studio V5 by selecting the "Matter - SoC Sensor over Thread" example project and click "Create":
@@ -50,8 +66,6 @@ Select "Temperature Sensor Support" and click "Install".
 Select the "Temperature Sensor Support" component and click "Install".
 
 Select "Matter Occupancy Sensor" and click "Uninstall".
-
-
 
 ## Add support for on-board sensors
 
