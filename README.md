@@ -136,6 +136,14 @@ Fill in the information shown below and click "Save".
 
 ![Create Endpoint](./images/create-endpoint-4.png)
 
+#### Add support for the Unit Localization Cluster
+
+![Add Unit Localization Cluster](./images/add-unit-localization-cluster.png)
+
+Add TemperatureUnit and set it to 1 = Celsius.
+
+![Temperature Unit Celsius](./images/temperature-unit-celsius.png)
+
 ### Add C++ classes for the sensors
 
 #### Create C++ classes for the BMP3xx - Pressure Sensor
