@@ -5,7 +5,7 @@
 
 This article shows how to modify the "Matter - SoC Sensor over Thread" example project with support for some of the sensors found on the Silicon Labs EFR32xG24 Dev Kit Board.
 
-This article is based on Silicon Labs Gecko SDK version 4.4.0 with Silicon Labs Matter 2.2.0 extensions.
+This article is based on Simplicity SDK Suite v2024.6.0 with Silicon Labs Matter 2.3.0 extensions (based on Matter version 1.3).
 
 ![Silicon Labs EFR32xG24 Dev Kit Board](./images/xg24-dk2601b.png)
 
@@ -15,57 +15,41 @@ This article is based on Silicon Labs Gecko SDK version 4.4.0 with Silicon Labs 
 - Install Simplicity Studio V5 from Silicon Labs.
 - Silicon Labs EFR32xG24 Dev Kit Board (BRD2601B).
 
-This article assumes that you have already installed Simplicity Studio V5 and the Gecko SDK 4.4.0.
+This article assumes that you have already installed Simplicity Studio V5 and the Simplicity SDK Suite v2024.6.0.
+
+## Create a new project based on the "Matter - SoC Sensor over Thread with external Bootloader" Solution Example
+
+Start by creating a new project in Simplicity Studio V5 by selecting the "Matter - SoC Sensor over Thread with external Bootloader" example solution project and click "Create":
+
+![Matter - SoC Sensor over Thread with external Bootloader example solution](./images/matter-sensor-thread-example-solution.png)
+
+This is a good starting point as it already implements a fully functional Matter over Thread device. Unfortunately it only supports some simulated sensors and not the actual sensors found on the develkopment kit board.
 
 ## Prepare the bootloader for Over-The-Air firmware upgrades
 
 See this article for more details on Creating a Gecko Bootloader for Use in Matter OTA Software Update: https://docs.silabs.com/matter/2.0.0/matter-overview-guides/ota-bootloader
 
-Find the "Bootloader - SoC Internal Storage (single image on 1536kB device)" example project and create a new project from it. This bootloader is for the Silicon Labs xG24-DK2601B EFR32xG24 Dev Kit, which has 1536kB Flash.
-
-![Bootloader](./images/bootloader.png)
-
 Open the .slcp file in your bootloader project and select "SOFTWARE COMPONENTS".
 
-Install the "GBL Compression (LZMA)" component under Platform->Bootloader->Core:
+Make sure that the "GBL Compression (LZMA)" component under Platform->Bootloader->Core is installed:
 
 ![GBL Compression (LZMA)](./images/bootloader-core-gbl-compression-lzma.png)
 
 Build the bootloader project, find the .s37 image file (under the Binaries folder) and flash it to your Silicon Labs Dev Kit.
 
-## Create the initial project based on the "Matter - SoC Sensor over Thread" example project
-
-Start by creating a new project in Simplicity Studio V5 by selecting the "Matter - SoC Sensor over Thread" example project and click "Create":
-
-![Matter - SoC Sensor over Thread Example Project](./images/matter-sensor-thread-example-project.png)
-
-This is a good starting point as it already implements a fully functional Matter over Thread device. Unfortunately it only supports some simulated sensors and not the actual sensors found on the develkopment kit board.
-
 ## Change the default sensor type
 
 When you create the sensor project it defaults to Occupancy Sensor. To switch between
-the sensors, uninstall the 'Matter Occupancy Sensor'/current sensor component and install the
-respective sensor component to enable it. One sensor component should be enabled for the app to build.
+the sensors, uninstall the install the
+"Temperature Sensor Support" to enable it.
 
 Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
 
-Navigate to "Silicon Labs Matter v2.2.0->Platform->Sensors:
+Navigate to "Silicon Labs Matter v2.3.0->Platform->Sensors:
 
 ![Sensor Components](./images/platform-sensor-components.png)
 
-Select the "Matter Temperature Sensor" component and click "Install".
-
-Select the "Matter Temperature Sensor" component and click "Install".
-
-When asked click on "Replace Matter Occupancy Sensor with Matter Temperature Sensor":
-
-![Replace Matter Occupancy Sensor](./images/replace-occupancy-sensor-component.png)
-
 Select "Temperature Sensor Support" and click "Install".
-
-Select the "Temperature Sensor Support" component and click "Install".
-
-Select "Matter Occupancy Sensor" and click "Uninstall".
 
 ## Add support for on-board sensors
 
@@ -73,7 +57,7 @@ Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
 
 ### Enable the hardware sensors
 
-Locate the "Board Control" component under Platform->Board, select it and click on the Configure icon.
+Locate the "Board Control" component under Platform->Board->Starter Kit, select it and click on the Configure icon.
 
 ![Board Control](./images/platform-board-control.png)
 
@@ -92,15 +76,23 @@ Install the following drivers found under Platform->Board Drivers:
 
 ### Add Matter Endpoints and Clusters for added sensor types
 
-Open the config->common folder and open the file "temperature-thread-app.zap".
+Open the config->common folder and open the file "sensor-thread-app.zap".
 
-Select "Endpoint - 1" in the ZCL editor and select "Edit" as shown below.
+By default the following endpoints are created:
 
-![Select Edit Endpoint](./images/select-edit-endpoint.png)
+![Default Endpoints](./images/default-endpoints.png)
 
-Endpoint-1 should already be correctly setup for a Temperature sensor as shown below:
+Select "Endpoint - 1" in the ZCL editor and select "Delete" as shown below.
 
-![Select Edit Endpoint](./images/endpoint-1.png)
+![Select Delete Endpoint](./images/delete-endpoint-1.png)
+
+Select "Endpoint - 2" in the ZCL editor and select "Edit" as shown below.
+
+![Select Edit Endpoint](./images/select-edit-endpoint-2.png)
+
+Change the Endpoint setting for "Endpoint - 2" to 1 as shown below and click Save:
+
+![Select Edit Endpoint](./images/endpoint-1-settings.png)
 
 In the list of clusters on the right panel, expand the "Measurement & Sensing" section and find the "Temperature Measurement" cluster and click on the settings icon.
 
@@ -110,7 +102,11 @@ Click on the NULL button in the Default field for the MeasuredValue attribute.
 
 ![MeasuredValue Default](./images/measured-value-default.png)
 
-Click Cancel.
+Click the X in the upper right corner.
+
+Select "Endpoint - 3" in the ZCL editor and select "Delete" as shown below.
+
+![Select Delete Endpoint](./images/delete-endpoint-3.png)
 
 #### Add Endpoint for Humidity Sensor
 
@@ -136,9 +132,13 @@ Fill in the information shown below and click "Save".
 
 ![Create Endpoint](./images/create-endpoint-4.png)
 
-#### Add support for the Unit Localization Cluster
+#### Add support for the Unit Localization Cluster in "Endpoint - 0"
+
+Select "Endpoint - 0" in the ZCL editor and enter "unit loc" in the search box:
 
 ![Add Unit Localization Cluster](./images/add-unit-localization-cluster.png)
+
+Change the Enable field to "Server" and click on the Configure icon.
 
 Add TemperatureUnit and set it to 1 = Celsius.
 
@@ -404,11 +404,15 @@ BMP3xxPressureSensor pressureSensor;
 Si70xxTemperatureHumiditySensor temperatureHumiditySensor;
 VEML6035AmbientLightSensor illuminanceSensor;
 
-void SilabsSensors::InitSensor(void)
+CHIP_ERROR SilabsSensors::Init()
 {
+  CHIP_ERROR err = CHIP_NO_ERROR;
+
   illuminanceSensor.Init();
   pressureSensor.Init();
   temperatureHumiditySensor.Init();
+
+  return err;
 }
 
 void UpdateRelativeHumidityMeasurement()
