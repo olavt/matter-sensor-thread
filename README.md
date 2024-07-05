@@ -17,6 +17,18 @@ This article is based on Simplicity SDK Suite v2024.6.0 with Silicon Labs Matter
 
 This article assumes that you have already installed Simplicity Studio V5 and the Simplicity SDK Suite v2024.6.0.
 
+## Enable long paths / filenames
+
+### Windows
+
+https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later
+
+### Git
+
+```
+git config --system core.longpaths true
+```
+
 ## Create a new project based on the "Matter - SoC Sensor over Thread with external Bootloader" Solution Example
 
 Start by creating a new project in Simplicity Studio V5 by selecting the "Matter - SoC Sensor over Thread with external Bootloader" example solution project and click "Create":
