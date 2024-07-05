@@ -74,6 +74,22 @@ Install the following drivers found under Platform->Board Drivers:
 * Si70xx - Temperature/Humidity Sensor
 * VEML6035 - Ambient Light Sensor
 
+## Change the OpenThread stack from Minimal Thread Device (MTD) to Full Thread Device (FTD)
+
+If you have a mains powered device, you may want to change the OpenThread stack from Minimal Thread Device (MTD) to Full Thread Device (FTD) in order for the device to participate in routing of messages.
+
+By default the sample is configured as a Minimal Thread Device.
+
+Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
+
+Search for "FTD", select the "Stack (FTD") component and click on "Install".
+
+![Install FTD](./images/install-ftd.png)
+
+When prompted to "Replace Stack (MTD) with Stack (FTD)" click OK.
+
+![Install FTD](./images/replace-mtd-with-ftd.png)
+
 ### Add Matter Endpoints and Clusters for added sensor types
 
 Open the config->common folder and open the file "sensor-thread-app.zap".
