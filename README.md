@@ -19,6 +19,8 @@ This article assumes that you have already installed Simplicity Studio V5 and th
 
 ## Enable long paths / filenames
 
+To avoid issues with filename length restrictions, make sure to apply settings to support longer paths / filenames.
+
 ### Windows
 
 https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later
