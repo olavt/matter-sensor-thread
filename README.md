@@ -162,6 +162,10 @@ Fill in the information shown below and click "Save".
 
 ![Create Endpoint](./images/create-endpoint-4.png)
 
+Change the settings for the Pressure Measurement cluster as follows:
+
+![Pressure Measurement Cluster Settings](./images/pressure-measurement-cluster-settings.png)
+
 #### Add support for the Unit Localization Cluster in "Endpoint - 0"
 
 Select "Endpoint - 0" in the ZCL editor and enter "unit loc" in the search box:
