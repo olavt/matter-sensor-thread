@@ -15,7 +15,7 @@ This article is based on Simplicity SDK Suite v2024.6.0 with Silicon Labs Matter
 - Install Simplicity Studio V5 from Silicon Labs.
 - Silicon Labs EFR32xG24 Dev Kit Board (BRD2601B).
 
-This article assumes that you have already installed Simplicity Studio V5 and the Simplicity SDK Suite v2024.6.0.
+This article assumes that you have already installed Simplicity Studio V5 and the Simplicity SDK Suite v2024.6.2 and Silicon Labs Matter 2.4.0.
 
 ## Enable long paths / filenames
 
@@ -54,8 +54,7 @@ Build the bootloader project, find the .s37 image file (under the Binaries folde
 ## Change the default sensor type
 
 When you create the sensor project it defaults to Occupancy Sensor. To switch between
-the sensors, uninstall the install the
-"Temperature Sensor Support" to enable it.
+the sensors, uninstall the "Occupancy Sensing Server Cluster" component and install the "Temperature Sensor Support" to enable it.
 
 Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
 
@@ -79,6 +78,8 @@ Make sure the relevant sensors are enabled:
 
 ![Board Control Settings](./images/platform-board-control-settings.png)
 
+Optional: Enable Microphone
+
 ### Add Board Drivers
 
 Install the following drivers found under Platform->Board Drivers:
@@ -87,6 +88,7 @@ Install the following drivers found under Platform->Board Drivers:
 * Pressure device driver for BMP3XX
 * Si70xx - Temperature/Humidity Sensor
 * VEML6035 - Ambient Light Sensor
+* Microphone (optional, not supported by Matter yet)
 
 ## Change the OpenThread stack from Minimal Thread Device (MTD) to Full Thread Device (FTD)
 
@@ -415,38 +417,185 @@ bool VEML6035AmbientLightSensor::MeasureIllumination(float* lux)
 
 ### Update example project to use the hardware sensors
 
-Locate the "src" folder and open "SensorsCallbacks.cpp".
+Locate the "include" folder and open the file "SensorManager.h".
 
 Replace the content of the source file with the following code:
 
 ```
-#include "SensorsCallbacks.h"
-#include "AppTask.h"
-#include <platform/silabs/platformAbstraction/SilabsPlatform.h>
+/*
+ * SensorManagerCustom.h
+ *
+ *  Created on: Dec 17, 2024
+ *      Author: olavt
+ */
 
-#include <app-common/zap-generated/attributes/Accessors.h>
-#include <app-common/zap-generated/ids/Attributes.h>
-#include <app-common/zap-generated/ids/Clusters.h>
+#pragma once
+
+#include <lib/core/CHIPError.h>
+#include "AppEvent.h"
 
 #include "BMP3xxPressureSensor.h"
 #include "Si70xxTemperatureHumiditySensor.h"
 #include "VEML6035AmbientLightSensor.h"
 
-using namespace ::chip::DeviceLayer::Silabs;
+namespace SensorManager
+{
+
+  CHIP_ERROR Init();
+
+  void UpdateMeasurements();
+
+  void UpdatePressureMeasuredValue(float measuredPressureKiloPascal);
+
+  void UpdateTemperatureMeasuredValue(float temperatureCelsius);
+
+  void UpdateCO2Measurement();
+
+  void UpdateRelativeHumidityMeasurement();
+
+  void UpdateIlluminanceMeasurement();
+
+  void UpdateTemperatureMeasurement();
+
+  void UpdatePressureMeasurement();
+
+  void MeasureSoundLevel();
+
+  void ButtonActionTriggered(AppEvent * aEvent);
+
+};
+
+```
+
+Locate the "src" folder and open the file "SensorManager.cpp".
+
+Replace the content of the source file with the following code:
+
+```
+/*
+ * SensorManagerCustom.cpp
+ *
+ *  Created on: Dec 17, 2024
+ *      Author: olavt
+ */
+
+#include <cmath>
+#include <platform/CHIPDeviceLayer.h>
+#include <app-common/zap-generated/attributes/Accessors.h>
+#include <app-common/zap-generated/ids/Attributes.h>
+#include <app-common/zap-generated/ids/Clusters.h>
+#include <app/clusters/occupancy-sensor-server/occupancy-hal.h>
+#include <app/clusters/occupancy-sensor-server/occupancy-sensor-server.h>
+#include <platform/silabs/platformAbstraction/SilabsPlatform.h>
+
+#include "sl_matter_sensor_config.h"
+#include "silabs_utils.h"
+
+#include <air-quality-sensor-manager.h>
+#include <SensorManager.h>
+
+using namespace chip;
+using namespace chip::app;
+using namespace chip::app::Clusters;
+using namespace chip::DeviceLayer::Silabs;
+using namespace chip::Protocols::InteractionModel;
+
+#define TEMPERATURE_SENSOR_ENDPOINT 1
+#define HUMIDITY_SENSOR_ENDPOINT 2
+#define ILLUMINANCE_SENSOR_ENDPOINT 3
+#define PRESSURE_SENSOR_ENDPOINT 4
+#define AIR_QUALITY_SENSOR_ENDPOINT 5
+
+constexpr chip::System::Clock::Seconds32 kSensorReadPeriod = chip::System::Clock::Seconds32(SL_MATTER_SENSOR_TIMER_PERIOD_S);
 
 BMP3xxPressureSensor pressureSensor;
 Si70xxTemperatureHumiditySensor temperatureHumiditySensor;
 VEML6035AmbientLightSensor illuminanceSensor;
 
-CHIP_ERROR SilabsSensors::Init()
+namespace SensorManager
 {
-  CHIP_ERROR err = CHIP_NO_ERROR;
 
-  illuminanceSensor.Init();
-  pressureSensor.Init();
-  temperatureHumiditySensor.Init();
+void SensorTimerTriggered(chip::System::Layer * aLayer, void * aAppState)
+{
+  UpdateMeasurements();
 
-  return err;
+  aLayer->StartTimer(kSensorReadPeriod, SensorTimerTriggered, nullptr);
+}
+
+CHIP_ERROR Init()
+{
+    // Wait a bit for allowing some time to setup a debug connection
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    CHIP_ERROR status = CHIP_NO_ERROR;
+
+    //chip::app::Clusters::AirQualitySensorManager::InitInstance(AIR_QUALITY_SENSOR_ENDPOINT);
+
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    illuminanceSensor.Init();
+    pressureSensor.Init();
+    temperatureHumiditySensor.Init();
+    //microphone.Init();
+
+    //char instanceName[] = "exp";
+    //sl_iostream_t* stream = sl_iostream_get_handle(instanceName);
+
+    //co2Sensor = new WinsenMHZ14(stream);
+    //co2Sensor->Initialize();
+    //if (co2Sensor->IsInitialized())
+    //  return status;
+
+    //delete co2Sensor;
+
+    //co2Sensor = new SensirionSCD30();
+    //co2Sensor->Initialize();
+
+    SensorTimerTriggered(&chip::DeviceLayer::SystemLayer(), nullptr);
+
+    return status;
+}
+
+void UpdatePressureMeasuredValue(float measuredPressureKiloPascal)
+{
+  int16_t measuredValue = (measuredPressureKiloPascal * 10 + 0.5);
+  SILABS_LOG("[INFO] UpdatePressureMeasuredValue: measuredValue=%d", measuredValue);
+
+  DeviceLayer::PlatformMgr().LockChipStack();
+
+  int8_t scale;
+  chip::app::Clusters::PressureMeasurement::Attributes::Scale::Get(PRESSURE_SENSOR_ENDPOINT, &scale);
+  float scaleFactor = std::pow(10.0, scale);
+  int16_t scaledValue = (measuredPressureKiloPascal * scaleFactor + 0.5);
+  SILABS_LOG("[INFO] UpdatePressureMeasuredValue: scaledValue=%d", scaledValue);
+  chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(PRESSURE_SENSOR_ENDPOINT, measuredValue);
+  chip::app::Clusters::PressureMeasurement::Attributes::ScaledValue::Set(PRESSURE_SENSOR_ENDPOINT, scaledValue);
+
+  chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+}
+
+void UpdateTemperatureMeasuredValue(float temperatureCelsius)
+{
+  int16_t reportedTemperature = (temperatureCelsius * 100 + 0.5);
+  SILABS_LOG("[INFO] UpdateTemperatureMeasuredValue: reportedTemperature=%d", reportedTemperature);
+  chip::DeviceLayer::PlatformMgr().LockChipStack();
+  chip::app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(TEMPERATURE_SENSOR_ENDPOINT, reportedTemperature);
+  chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+}
+
+void UpdateCO2Measurement()
+{
+  //float co2Level;
+  //if (co2Sensor->MeasureCo2Level(&co2Level))
+  //{
+  //    SILABS_LOG("[INFO] Updating CO2 measurement. co2Level=%f", co2Level);
+
+  //    AirQualitySensorManager* airQualitySensorManager = AirQualitySensorManager::GetInstance();
+
+  //    chip::DeviceLayer::PlatformMgr().LockChipStack();
+  //    airQualitySensorManager->OnCarbonDioxideMeasurementChangeHandler(co2Level);
+  //    chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+  //}
 }
 
 void UpdateRelativeHumidityMeasurement()
@@ -454,8 +603,10 @@ void UpdateRelativeHumidityMeasurement()
   float measuredRelativeHumidity;
   if (temperatureHumiditySensor.MeasureRelativeHumidity(&measuredRelativeHumidity))
   {
+      SILABS_LOG("[INFO] Updating humidity measurement.");
+
       chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(2, measuredRelativeHumidity * 100);
+      chip::app::Clusters::RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(HUMIDITY_SENSOR_ENDPOINT, measuredRelativeHumidity * 100);
       chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
@@ -465,56 +616,51 @@ void UpdateIlluminanceMeasurement()
   float measuredLux;
   if (illuminanceSensor.MeasureIllumination(&measuredLux))
   {
+      SILABS_LOG("[INFO] Updating illuminance measurement.");
+
       chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::IlluminanceMeasurement::Attributes::MeasuredValue::Set(3, measuredLux);
+      chip::app::Clusters::IlluminanceMeasurement::Attributes::MeasuredValue::Set(ILLUMINANCE_SENSOR_ENDPOINT, measuredLux);
       chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
 
 void UpdateTemperatureMeasurement()
 {
-  float measuredTemperature;
-  if (temperatureHumiditySensor.MeasureTemperature(&measuredTemperature))
-  {
-      chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(1, measuredTemperature * 100);
-      chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-  }
+  float temperatureCelsius;
+  if (temperatureHumiditySensor.MeasureTemperature(&temperatureCelsius))
+    UpdateTemperatureMeasuredValue(temperatureCelsius);
 }
 
 void UpdatePressureMeasurement()
 {
   float measuredPressure;
   if (pressureSensor.MeasurePressure(&measuredPressure))
-  {
-      chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(4, measuredPressure * 10);
-      chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-  }
+    UpdatePressureMeasuredValue(measuredPressure);
+}
+
+void MeasureSoundLevel()
+{
+  //float measuredSoundLevel;
+  //microphone.MeasureSoundLevel(&measuredSoundLevel);
 }
 
 void UpdateMeasurements()
 {
+  SILABS_LOG("[INFO] Updating measurements.");
+  UpdateCO2Measurement();
   UpdateIlluminanceMeasurement();
   UpdateRelativeHumidityMeasurement();
   UpdateTemperatureMeasurement();
   UpdatePressureMeasurement();
+  MeasureSoundLevel();
 }
 
-void SilabsSensors::ActionTriggered(AppEvent * aEvent)
+void ButtonActionTriggered(AppEvent * aEvent)
 {
-  if (aEvent->Type == AppEvent::kEventType_Button)
-  {
-      if (aEvent->ButtonEvent.Action == static_cast<uint8_t>(SilabsPlatform::ButtonAction::ButtonPressed))
-      {
-          UpdateMeasurements();
-      }
-  }
-  else if (aEvent->Type == AppEvent::kEventType_Timer)
-  {
-      UpdateMeasurements();
-  }
 }
+
+}
+
 ```
 
 You should now be able to build and test the Matter Accessory Device!
