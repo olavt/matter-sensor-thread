@@ -473,7 +473,7 @@ Replace the content of the source file with the following code:
 
 ```
 /*
- * SensorManagerCustom.cpp
+ * SensorManager.cpp
  *
  *  Created on: Dec 17, 2024
  *      Author: olavt
@@ -561,7 +561,7 @@ void UpdatePressureMeasuredValue(float measuredPressureKiloPascal)
   int16_t measuredValue = (measuredPressureKiloPascal * 10 + 0.5);
   SILABS_LOG("[INFO] UpdatePressureMeasuredValue: measuredValue=%d", measuredValue);
 
-  DeviceLayer::PlatformMgr().LockChipStack();
+  //chip::DeviceLayer::PlatformMgr().LockChipStack();
 
   int8_t scale;
   chip::app::Clusters::PressureMeasurement::Attributes::Scale::Get(PRESSURE_SENSOR_ENDPOINT, &scale);
@@ -571,16 +571,16 @@ void UpdatePressureMeasuredValue(float measuredPressureKiloPascal)
   chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(PRESSURE_SENSOR_ENDPOINT, measuredValue);
   chip::app::Clusters::PressureMeasurement::Attributes::ScaledValue::Set(PRESSURE_SENSOR_ENDPOINT, scaledValue);
 
-  chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+  //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
 }
 
 void UpdateTemperatureMeasuredValue(float temperatureCelsius)
 {
   int16_t reportedTemperature = (temperatureCelsius * 100 + 0.5);
   SILABS_LOG("[INFO] UpdateTemperatureMeasuredValue: reportedTemperature=%d", reportedTemperature);
-  chip::DeviceLayer::PlatformMgr().LockChipStack();
+  //chip::DeviceLayer::PlatformMgr().LockChipStack();
   chip::app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(TEMPERATURE_SENSOR_ENDPOINT, reportedTemperature);
-  chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+  //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
 }
 
 void UpdateCO2Measurement()
@@ -592,9 +592,9 @@ void UpdateCO2Measurement()
 
   //    AirQualitySensorManager* airQualitySensorManager = AirQualitySensorManager::GetInstance();
 
-  //    chip::DeviceLayer::PlatformMgr().LockChipStack();
+  //    //chip::DeviceLayer::PlatformMgr().LockChipStack();
   //    airQualitySensorManager->OnCarbonDioxideMeasurementChangeHandler(co2Level);
-  //    chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+  //    //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   //}
 }
 
@@ -605,9 +605,9 @@ void UpdateRelativeHumidityMeasurement()
   {
       SILABS_LOG("[INFO] Updating humidity measurement.");
 
-      chip::DeviceLayer::PlatformMgr().LockChipStack();
+      //chip::DeviceLayer::PlatformMgr().LockChipStack();
       chip::app::Clusters::RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(HUMIDITY_SENSOR_ENDPOINT, measuredRelativeHumidity * 100);
-      chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+      //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
 
@@ -618,9 +618,9 @@ void UpdateIlluminanceMeasurement()
   {
       SILABS_LOG("[INFO] Updating illuminance measurement.");
 
-      chip::DeviceLayer::PlatformMgr().LockChipStack();
+      //chip::DeviceLayer::PlatformMgr().LockChipStack();
       chip::app::Clusters::IlluminanceMeasurement::Attributes::MeasuredValue::Set(ILLUMINANCE_SENSOR_ENDPOINT, measuredLux);
-      chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+      //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
 
@@ -657,9 +657,16 @@ void UpdateMeasurements()
 
 void ButtonActionTriggered(AppEvent * aEvent)
 {
+  UpdateMeasurements();
 }
 
 }
+
+
+
+
+
+
 
 ```
 
