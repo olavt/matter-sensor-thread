@@ -5,7 +5,7 @@
 
 This article shows how to modify the "Matter - SoC Sensor over Thread" example project with support for some of the sensors found on the Silicon Labs EFR32xG24 Dev Kit Board.
 
-This article is based on Simplicity SDK Suite v2024.6.0 with Silicon Labs Matter 2.3.0 extensions (based on Matter version 1.3).
+This article is based on Simplicity SDK Suite v2024.12.0 with Silicon Labs Matter 2.5.0 extensions (based on Matter version 1.4).
 
 ![Silicon Labs EFR32xG24 Dev Kit Board](./images/xg24-dk2601b.png)
 
@@ -15,7 +15,7 @@ This article is based on Simplicity SDK Suite v2024.6.0 with Silicon Labs Matter
 - Install Simplicity Studio V5 from Silicon Labs.
 - Silicon Labs EFR32xG24 Dev Kit Board (BRD2601B).
 
-This article assumes that you have already installed Simplicity Studio V5 and the Simplicity SDK Suite v2024.6.2 and Silicon Labs Matter 2.4.0.
+This article assumes that you have already installed Simplicity Studio V5 and the Simplicity SDK Suite v2024.12.0 and Silicon Labs Matter 2.5.0.
 
 ## Enable long paths / filenames
 
@@ -51,18 +51,27 @@ Make sure that the "GBL Compression (LZMA)" component under Platform->Bootloader
 
 Build the bootloader project, find the .s37 image file (under the Binaries folder) and flash it to your Silicon Labs Dev Kit.
 
-## Change the default sensor type
+## Change the OpenThread stack from Minimal Thread Device (MTD) to Full Thread Device (FTD)
 
-When you create the sensor project it defaults to Occupancy Sensor. To switch between
-the sensors, uninstall the "Occupancy Sensing Server Cluster" component and install the "Temperature Sensor Support" to enable it.
+If you have a mains powered device, you may want to change the OpenThread stack from Minimal Thread Device (MTD) to Full Thread Device (FTD) in order for the device to participate in routing of messages.
+
+By default the sample is configured as a Minimal Thread Device.
 
 Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
 
-Navigate to "Silicon Labs Matter v2.3.0->Platform->Sensors:
+Search for "FTD", select the "Stack (FTD") component and click on "Install".
 
-![Sensor Components](./images/platform-sensor-components.png)
+![Install FTD](./images/install-ftd.png)
 
-Select "Temperature Sensor Support" and click "Install".
+When prompted to "Replace Stack (MTD) with Stack (FTD)" click OK.
+
+![Install FTD](./images/replace-mtd-with-ftd.png)
+
+## Remove unused sensor type
+
+When you create the sensor project it defaults to Occupancy Sensor and Temperature sensor. We will not be used the occupancy sensor functionality, so uninstall the "Occupancy Sensing Server Cluster".
+
+Search for "Occupancy" and uninstall the "Occupancy Sensing Server Cluster" component.
 
 ## Add support for on-board sensors
 
@@ -89,22 +98,6 @@ Install the following drivers found under Platform->Board Drivers:
 * Si70xx - Temperature/Humidity Sensor
 * VEML6035 - Ambient Light Sensor
 * Microphone (optional, not supported by Matter yet)
-
-## Change the OpenThread stack from Minimal Thread Device (MTD) to Full Thread Device (FTD)
-
-If you have a mains powered device, you may want to change the OpenThread stack from Minimal Thread Device (MTD) to Full Thread Device (FTD) in order for the device to participate in routing of messages.
-
-By default the sample is configured as a Minimal Thread Device.
-
-Open the .slcp file in your project and select "SOFTWARE COMPONENTS".
-
-Search for "FTD", select the "Stack (FTD") component and click on "Install".
-
-![Install FTD](./images/install-ftd.png)
-
-When prompted to "Replace Stack (MTD) with Stack (FTD)" click OK.
-
-![Install FTD](./images/replace-mtd-with-ftd.png)
 
 ### Add Matter Endpoints and Clusters for added sensor types
 
@@ -179,6 +172,10 @@ Change the Enable field to "Server" and click on the Configure icon.
 Add TemperatureUnit and set it to 1 = Celsius.
 
 ![Temperature Unit Celsius](./images/temperature-unit-celsius.png)
+
+## Support for newer C++ versions
+
+By default, the project will support "-std=gnu++17". Right click on the project and select "Properties". Then expand "C/C++ Build" and select "Settings". Expand "GNU ARM C++ Compiler" and select the desired C++ Language Dialect.
 
 ### Add C++ classes for the sensors
 
@@ -661,13 +658,17 @@ void ButtonActionTriggered(AppEvent * aEvent)
 }
 
 }
+```
 
+## Remove Occupoancy Sensor code
 
+Remove these lines of code in AppTask.c:
 
-
-
-
-
+```
+    // Initialize mOccupancyInstance with the required feature map
+    BitMask<app::Clusters::OccupancySensing::Feature> featureMap(app::Clusters::OccupancySensing::Feature::kOther);
+    mOccupancyInstance = std::make_unique<chip::app::Clusters::OccupancySensing::Instance>(featureMap);
+    mOccupancyInstance->Init();
 ```
 
 You should now be able to build and test the Matter Accessory Device!
