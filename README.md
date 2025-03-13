@@ -741,6 +741,20 @@ Set the ClusterRevision attribute to the default value 3.
 
 Now Build the project
 
+## Obtain Thread Dataset from a joined device
+
+![Launch Console](./images/launch-console.png)
+
+![Select Serial 1](./images/select-serial-1.png)
+
+![Connect Serial 1](./images/connect-serial-1.png)
+
+Issue the following command in the Matter CLI:
+
+```
+matterCli> otcli dataset active -x
+```
+
 ## Generate Matter Onboarding Codes (QR Code and Manual Pairing Code)
 
 Note! The values used below are defined in "CHIPProjectConfig.h" found in the include folder of your project.
