@@ -31,7 +31,7 @@ class MatterAirQuality
 {
     public:
 
-        MatterAirQuality(AirQualitySensor* airQualitySensor, EndpointId airQualityEndpointId);
+        MatterAirQuality(std::unique_ptr<AirQualitySensor> airQualitySensor, EndpointId airQualityEndpointId);
 
         void StartMeasurements();
 
@@ -47,7 +47,7 @@ class MatterAirQuality
 
         static std::unordered_map<AirQualitySensor::MeasurementType, ConcentrationMeasurement::Instance<true, true, true, true, true, true>*> measurementTypeToInstance;
 
-        AirQualitySensor* m_airQualitySensor;
+        std::unique_ptr<AirQualitySensor> m_airQualitySensor;
         EndpointId m_airQualityEndpointId;
         Measurements m_measurements;
         AirQuality::Instance* m_airQualityInstance;

@@ -58,8 +58,8 @@ float getElapsedSeconds()
   return elapsedSeconds;
 }
 
-MatterAirQuality::MatterAirQuality(AirQualitySensor* airQualitySensor, EndpointId airQualityEndpointId)
-    : m_airQualitySensor(airQualitySensor), m_airQualityEndpointId(airQualityEndpointId)
+MatterAirQuality::MatterAirQuality(std::unique_ptr<AirQualitySensor> airQualitySensor, EndpointId airQualityEndpointId)
+    : m_airQualitySensor(std::move(airQualitySensor)), m_airQualityEndpointId(airQualityEndpointId)
 {
     CreateAirQualityInstance();
     AddConcentrationMeasurementInstances();
