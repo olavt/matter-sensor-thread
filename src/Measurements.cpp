@@ -1,0 +1,73 @@
+#include "Measurements.h"
+#include <stdexcept>
+#include "sl_sleeptimer.h"
+
+#include <platform/CHIPDeviceLayer.h>
+
+// Returns the elapsed seconds since boot of the device
+float getElapsedSeconds()
+{
+  // Get the current monotonic time in milliseconds
+  uint64_t tick_ms = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
+
+  // Convert milliseconds to seconds
+  float elapsedSeconds = static_cast<float>(tick_ms) / 1000.0f;
+
+  return elapsedSeconds;
+}
+
+void Measurements::AddId(uint32_t id, uint32_t averageWindowSizeSeconds, uint32_t peakWindowSizeSeconds)
+{
+    m_measurements.emplace(id, MeasuredValues(id, averageWindowSizeSeconds, peakWindowSizeSeconds));
+}
+
+void Measurements::AddMeasurement(uint32_t id, float value, float elapsedTimeSeconds)
+{
+    auto it = m_measurements.find(id);
+    it->second.Add(value, elapsedTimeSeconds);
+}
+
+void Measurements::AddMeasurementNow(uint32_t id, float value)
+{
+    AddMeasurement(id, value, getElapsedSeconds());
+}
+
+float Measurements::GetLatest(uint32_t id)
+{
+    auto it = m_measurements.find(id);
+    return it->second.GetLatest();
+}
+
+float Measurements::GetAverage(uint32_t id)
+{
+    auto it = m_measurements.find(id);
+    return it->second.GetAverage();
+}
+
+uint32_t Measurements::GetAverageWindowSizeSeconds(uint32_t id)
+{
+    auto it = m_measurements.find(id);
+    return it->second.GetAverageWindowSizeSeconds();
+}
+
+float Measurements::GetPeak(uint32_t id)
+{
+    auto it = m_measurements.find(id);
+    return it->second.GetPeak();
+}
+
+uint32_t Measurements::GetPeakWindowSizeSeconds(uint32_t id)
+{
+    auto it = m_measurements.find(id);
+    return it->second.GetPeakWindowSizeSeconds();
+}
+
+std::vector<uint32_t> Measurements::GetIds() const
+{
+    std::vector<uint32_t> ids;
+    ids.reserve(m_measurements.size()); // Optimize allocation
+    for (const auto& pair : m_measurements) {
+        ids.push_back(pair.first);
+    }
+    return ids;
+}
