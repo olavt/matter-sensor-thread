@@ -1,20 +1,5 @@
 #include "Measurements.h"
 #include <stdexcept>
-#include "sl_sleeptimer.h"
-
-#include <platform/CHIPDeviceLayer.h>
-
-// Returns the elapsed seconds since boot of the device
-float getElapsedSeconds()
-{
-  // Get the current monotonic time in milliseconds
-  uint64_t tick_ms = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
-
-  // Convert milliseconds to seconds
-  float elapsedSeconds = static_cast<float>(tick_ms) / 1000.0f;
-
-  return elapsedSeconds;
-}
 
 void Measurements::AddId(uint32_t id, uint32_t averageWindowSizeSeconds, uint32_t peakWindowSizeSeconds)
 {
@@ -25,11 +10,6 @@ void Measurements::AddMeasurement(uint32_t id, float value, float elapsedTimeSec
 {
     auto it = m_measurements.find(id);
     it->second.Add(value, elapsedTimeSeconds);
-}
-
-void Measurements::AddMeasurementNow(uint32_t id, float value)
-{
-    AddMeasurement(id, value, getElapsedSeconds());
 }
 
 float Measurements::GetLatest(uint32_t id)

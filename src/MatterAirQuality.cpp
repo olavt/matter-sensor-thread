@@ -11,7 +11,6 @@
 
 #include <platform/CHIPDeviceLayer.h>
 #include <app-common/zap-generated/attributes/Accessors.h>
-#include <app-common/zap-generated/ids/Attributes.h>
 #include <app-common/zap-generated/ids/Clusters.h>
 #include <platform/silabs/platformAbstraction/SilabsPlatform.h>
 
@@ -47,8 +46,20 @@ const std::unordered_map<uint32_t, AirQualitySensor::MeasurementType> MatterAirQ
 
 std::unordered_map<AirQualitySensor::MeasurementType, ConcentrationMeasurement::Instance<true, true, true, true, true, true>*> MatterAirQuality::measurementTypeToInstance;
 
-MatterAirQuality::MatterAirQuality(std::unique_ptr<AirQualitySensor> airQualitySensor, EndpointId airQualityEndpointId)
-    : m_airQualitySensor(std::move(airQualitySensor)), m_airQualityEndpointId(airQualityEndpointId)
+// Returns the elapsed seconds since boot of the device
+float getElapsedSeconds()
+{
+  // Get the current monotonic time in milliseconds
+  uint64_t tick_ms = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
+
+  // Convert milliseconds to seconds
+  float elapsedSeconds = static_cast<float>(tick_ms) / 1000.0f;
+
+  return elapsedSeconds;
+}
+
+MatterAirQuality::MatterAirQuality(AirQualitySensor* airQualitySensor, EndpointId airQualityEndpointId)
+    : m_airQualitySensor(airQualitySensor), m_airQualityEndpointId(airQualityEndpointId)
 {
     CreateAirQualityInstance();
     AddConcentrationMeasurementInstances();
@@ -61,6 +72,9 @@ void MatterAirQuality::StartMeasurements()
 
 void MatterAirQuality::CreateAirQualityInstance()
 {
+  m_measurements.AddId(RelativeHumidityMeasurement::Id, 60, 60);
+  m_measurements.AddId(TemperatureMeasurement::Id, 60, 60);
+
   BitMask<AirQuality::Feature> features = BitMask<AirQuality::Feature>(
       AirQuality::Feature::kFair,
       AirQuality::Feature::kModerate,
@@ -319,13 +333,17 @@ void MatterAirQuality::MeasureAirQuality()
             continue; // Skip to the next measurement
         }
 
+        uint32_t clusterId = it->second;
+
         // Log the measurement
         SILABS_LOG("MeasureAirQuality: %s: %f",
                     AirQualitySensor::MeasurementTypeToString(measurement.type).c_str(),
                     measurement.value);
 
+        float elapsedSeconds = getElapsedSeconds();
+
         // Add the measurement to the measurements store
-        m_measurements.AddMeasurementNow(it->second, measurement.value);
+        m_measurements.AddMeasurement(clusterId, measurement.value, elapsedSeconds);
     }
 
     DeviceLayer::PlatformMgr().ScheduleWork(UpdateAirQualityAttributes, reinterpret_cast<intptr_t>(this));

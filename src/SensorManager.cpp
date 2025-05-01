@@ -76,10 +76,10 @@ CHIP_ERROR Init()
 
     //delete co2Sensor;
 
-    std::unique_ptr<AirQualitySensor> airQualitySensor = std::make_unique<SensirionSCD30>();
+    AirQualitySensor* airQualitySensor = new SensirionSCD30(610.0);
     airQualitySensor->Init();
 
-    matterAirQuality = new MatterAirQuality(std::move(airQualitySensor), AIR_QUALITY_SENSOR_ENDPOINT);
+    matterAirQuality = new MatterAirQuality(airQualitySensor, AIR_QUALITY_SENSOR_ENDPOINT);
     matterAirQuality->StartMeasurements();
 
     SensorTimerTriggered(&chip::DeviceLayer::SystemLayer(), nullptr);
@@ -180,11 +180,11 @@ void UpdateMeasurements()
 {
   SILABS_LOG("[INFO] Updating measurements.");
   UpdateAirQualityMeasurements();
-  UpdateIlluminanceMeasurement();
-  UpdateRelativeHumidityMeasurement();
-  UpdateTemperatureMeasurement();
-  UpdatePressureMeasurement();
-  MeasureSoundLevel();
+  //UpdateIlluminanceMeasurement();
+  //UpdateRelativeHumidityMeasurement();
+  //UpdateTemperatureMeasurement();
+  //UpdatePressureMeasurement();
+  //MeasureSoundLevel();
 }
 
 void ButtonActionTriggered(AppEvent * aEvent)
