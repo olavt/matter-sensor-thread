@@ -114,21 +114,6 @@ void UpdateTemperatureMeasuredValue(EndpointId endpoint, float temperatureCelsiu
   //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
 }
 
-//void UpdateCO2Measurement()
-//{
-//  float co2Level;
-//  if (co2Sensor->MeasureCo2Level(&co2Level))
-//  {
-//      SILABS_LOG("[INFO] Updating CO2 measurement. co2Level=%f", co2Level);
-//
-//      AirQualitySensorManager* airQualitySensorManager = AirQualitySensorManager::GetInstance();
-//
-//      //chip::DeviceLayer::PlatformMgr().LockChipStack();
-//      airQualitySensorManager->OnCarbonDioxideMeasurementChangeHandler(co2Level);
-//      //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-//  }
-//}
-
 void UpdateHumidityMeasuredValue(EndpointId endpoint, float relativeHumidity)
 {
   SILABS_LOG("[INFO] UpdateHumidityMeasuredValue: relativeHumidity=%f", relativeHumidity);
@@ -194,7 +179,6 @@ void UpdateAirQualityMeasurements()
 void UpdateMeasurements()
 {
   SILABS_LOG("[INFO] Updating measurements.");
-  //UpdateCO2Measurement();
   UpdateAirQualityMeasurements();
   UpdateIlluminanceMeasurement();
   UpdateRelativeHumidityMeasurement();
