@@ -5,6 +5,7 @@
  *      Author: olavt
  */
 
+#include <MatterHumiditySensor.h>
 #include <platform/CHIPDeviceLayer.h>
 
 #include "sl_matter_sensor_config.h"
@@ -13,7 +14,6 @@
 #include <SensorManager.h>
 #include "AirQualitySensor.h"
 #include "MatterAirQuality.h"
-#include "MatterHumidity.h"
 #include "MatterLightSensor.h"
 #include "MatterPressureSensor.h"
 #include "MatterTemperature.h"
@@ -22,9 +22,6 @@
 
 using namespace chip;
 using namespace chip::app;
-using namespace chip::app::Clusters;
-using namespace chip::DeviceLayer::Silabs;
-using namespace chip::Protocols::InteractionModel;
 
 #define TEMPERATURE_SENSOR_ENDPOINT 1
 #define HUMIDITY_SENSOR_ENDPOINT 2
@@ -39,7 +36,7 @@ std::shared_ptr<Si70xxTemperatureHumiditySensor> temperatureHumiditySensor;
 std::shared_ptr<VEML6035AmbientLightSensor> ambientLightSensor;
 
 std::unique_ptr<MatterTemperature> matterTemperature;
-std::unique_ptr<MatterHumidity> matterHumidity;
+std::unique_ptr<MatterHumiditySensor> matterHumidity;
 std::unique_ptr<MatterLightSensor> matterLightSensor;
 std::unique_ptr<MatterPressureSensor> matterPressureSensor;
 std::unique_ptr<MatterAirQuality> matterAirQuality;
@@ -85,7 +82,7 @@ CHIP_ERROR Init()
 
     matterTemperature = std::make_unique<MatterTemperature>(TEMPERATURE_SENSOR_ENDPOINT, temperatureHumiditySensor);
 
-    matterHumidity = std::make_unique<MatterHumidity>(HUMIDITY_SENSOR_ENDPOINT, temperatureHumiditySensor);
+    matterHumidity = std::make_unique<MatterHumiditySensor>(HUMIDITY_SENSOR_ENDPOINT, temperatureHumiditySensor);
 
     matterLightSensor = std::make_unique<MatterLightSensor>(LIGHT_SENSOR_ENDPOINT, ambientLightSensor);
 

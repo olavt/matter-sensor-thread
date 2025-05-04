@@ -5,18 +5,17 @@
  *      Author: olavt
  */
 
-#include "MatterHumidity.h"
-
 #include <cmath>
 #include <app-common/zap-generated/attributes/Accessors.h>
+#include <MatterHumiditySensor.h>
 #include "silabs_utils.h"
 
-MatterHumidity::MatterHumidity(EndpointId humidityEndpointId, std::shared_ptr<RelativeHumiditySensor> humiditySensor)
+MatterHumiditySensor::MatterHumiditySensor(EndpointId humidityEndpointId, std::shared_ptr<RelativeHumiditySensor> humiditySensor)
 : m_humidityEndpointId(humidityEndpointId), m_humiditySensor(humiditySensor)
 {
 }
 
-void MatterHumidity::UpdateMeasurements()
+void MatterHumiditySensor::UpdateMeasurements()
 {
   auto humidity = m_humiditySensor->MeasureRelativeHumidity();
   if (humidity)
@@ -27,7 +26,7 @@ void MatterHumidity::UpdateMeasurements()
     }
 }
 
-void MatterHumidity::UpdateHumidityAttributes(EndpointId endpoint, float relativeHumidity)
+void MatterHumiditySensor::UpdateHumidityAttributes(EndpointId endpoint, float relativeHumidity)
 {
   SILABS_LOG("[INFO] UpdateHumidityMeasuredValue: relativeHumidity=%f", relativeHumidity);
 

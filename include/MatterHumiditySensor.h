@@ -15,12 +15,12 @@
 
 using namespace chip;
 
-class MatterHumidity
+class MatterHumiditySensor
 {
 
 public:
 
-  MatterHumidity(chip::EndpointId humidityEndpointId, std::shared_ptr<RelativeHumiditySensor> humiditySensor);
+  MatterHumiditySensor(chip::EndpointId humidityEndpointId, std::shared_ptr<RelativeHumiditySensor> humiditySensor);
 
   void UpdateMeasurements();
 
