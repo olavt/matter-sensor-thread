@@ -13,10 +13,10 @@ public:
     }
 
     // Initialize the sensor
-    void Init() override;
+    bool Init() override;
 
     // Get the set of measurement types supported by this sensor
-    std::set<AirQualitySensor::MeasurementType> GetSupportedMeasurements() const override;
+    std::set<Sensor::MeasurementType> GetSupportedMeasurements() const override;
 
     // Read all supported measurements
     std::vector<AirQualitySensor::Measurement> ReadAllMeasurements() override;

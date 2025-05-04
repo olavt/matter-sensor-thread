@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 #include <platform/CHIPDeviceLayer.h>
-//#include <app-common/zap-generated/attributes/Accessors.h>
 #include <app-common/zap-generated/ids/Attributes.h>
 #include <app-common/zap-generated/ids/Clusters.h>
 #include <platform/silabs/platformAbstraction/SilabsPlatform.h>
@@ -31,11 +30,11 @@ class MatterAirQuality
 {
     public:
 
-        MatterAirQuality(std::unique_ptr<AirQualitySensor> airQualitySensor, EndpointId airQualityEndpointId);
+        MatterAirQuality(EndpointId airQualityEndpointId, std::shared_ptr<AirQualitySensor> airQualitySensor);
 
         void StartMeasurements();
 
-        void MeasureAirQuality();
+        void UpdateMeasurements();
 
     private:
 
@@ -47,8 +46,8 @@ class MatterAirQuality
 
         static std::unordered_map<AirQualitySensor::MeasurementType, ConcentrationMeasurement::Instance<true, true, true, true, true, true>*> measurementTypeToInstance;
 
-        std::unique_ptr<AirQualitySensor> m_airQualitySensor;
         EndpointId m_airQualityEndpointId;
+        std::shared_ptr<AirQualitySensor> m_airQualitySensor;
         Measurements m_measurements;
         AirQuality::Instance* m_airQualityInstance;
 

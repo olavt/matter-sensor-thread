@@ -32,7 +32,7 @@
 #ifndef SENSIRION_I2C_H
 #define SENSIRION_I2C_H
 
-#include "../../sensors/sensirion/sensirion_config.h"
+#include "sensirion_config.h"
 
 #ifdef __cplusplus
 extern "C" {

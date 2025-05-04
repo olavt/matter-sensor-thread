@@ -22,26 +22,26 @@ using namespace chip::app::Clusters::AirQuality;
 
 // Initialize measurementTypeToClusterId
 const std::unordered_map<AirQualitySensor::MeasurementType, uint32_t> MatterAirQuality::measurementTypeToClusterId = {
-    {AirQualitySensor::MeasurementType::AmbientHumidity, RelativeHumidityMeasurement::Id},
-    {AirQualitySensor::MeasurementType::AmbientTemperature, TemperatureMeasurement::Id},
-    {AirQualitySensor::MeasurementType::CO2, CarbonDioxideConcentrationMeasurement::Id},
-    {AirQualitySensor::MeasurementType::NOxIndex, NitrogenDioxideConcentrationMeasurement::Id},
-    {AirQualitySensor::MeasurementType::VOCIndex, TotalVolatileOrganicCompoundsConcentrationMeasurement::Id},
-    {AirQualitySensor::MeasurementType::ParticulateMatter1p0, Pm1ConcentrationMeasurement::Id},
-    {AirQualitySensor::MeasurementType::ParticulateMatter2p5, Pm25ConcentrationMeasurement::Id},
-    {AirQualitySensor::MeasurementType::ParticulateMatter10p0, Pm10ConcentrationMeasurement::Id}
+    {Sensor::MeasurementType::RelativeHumidity, RelativeHumidityMeasurement::Id},
+    {Sensor::MeasurementType::Temperature, TemperatureMeasurement::Id},
+    {Sensor::MeasurementType::CO2, CarbonDioxideConcentrationMeasurement::Id},
+    {Sensor::MeasurementType::NOx, NitrogenDioxideConcentrationMeasurement::Id},
+    {Sensor::MeasurementType::VOC, TotalVolatileOrganicCompoundsConcentrationMeasurement::Id},
+    {Sensor::MeasurementType::PM1p0, Pm1ConcentrationMeasurement::Id},
+    {Sensor::MeasurementType::PM2p5, Pm25ConcentrationMeasurement::Id},
+    {Sensor::MeasurementType::PM10p0, Pm10ConcentrationMeasurement::Id}
 };
 
 // Initialize clusterIdToMeasurementType (reverse mapping)
 const std::unordered_map<uint32_t, AirQualitySensor::MeasurementType> MatterAirQuality::clusterIdToMeasurementType = {
-    {RelativeHumidityMeasurement::Id, AirQualitySensor::MeasurementType::AmbientHumidity},
-    {TemperatureMeasurement::Id, AirQualitySensor::MeasurementType::AmbientTemperature},
-    {CarbonDioxideConcentrationMeasurement::Id, AirQualitySensor::MeasurementType::CO2},
-    {NitrogenDioxideConcentrationMeasurement::Id, AirQualitySensor::MeasurementType::NOxIndex},
-    {TotalVolatileOrganicCompoundsConcentrationMeasurement::Id, AirQualitySensor::MeasurementType::VOCIndex},
-    {Pm1ConcentrationMeasurement::Id, AirQualitySensor::MeasurementType::ParticulateMatter1p0},
-    {Pm25ConcentrationMeasurement::Id, AirQualitySensor::MeasurementType::ParticulateMatter2p5},
-    {Pm10ConcentrationMeasurement::Id, AirQualitySensor::MeasurementType::ParticulateMatter10p0}
+    {RelativeHumidityMeasurement::Id, Sensor::MeasurementType::RelativeHumidity},
+    {TemperatureMeasurement::Id, Sensor::MeasurementType::RelativeHumidity},
+    {CarbonDioxideConcentrationMeasurement::Id, Sensor::MeasurementType::CO2},
+    {NitrogenDioxideConcentrationMeasurement::Id, Sensor::MeasurementType::NOx},
+    {TotalVolatileOrganicCompoundsConcentrationMeasurement::Id, Sensor::MeasurementType::VOC},
+    {Pm1ConcentrationMeasurement::Id, Sensor::MeasurementType::PM1p0},
+    {Pm25ConcentrationMeasurement::Id, Sensor::MeasurementType::PM2p5},
+    {Pm10ConcentrationMeasurement::Id, Sensor::MeasurementType::PM10p0}
 };
 
 std::unordered_map<AirQualitySensor::MeasurementType, ConcentrationMeasurement::Instance<true, true, true, true, true, true>*> MatterAirQuality::measurementTypeToInstance;
@@ -58,8 +58,8 @@ float getElapsedSeconds()
   return elapsedSeconds;
 }
 
-MatterAirQuality::MatterAirQuality(std::unique_ptr<AirQualitySensor> airQualitySensor, EndpointId airQualityEndpointId)
-    : m_airQualitySensor(std::move(airQualitySensor)), m_airQualityEndpointId(airQualityEndpointId)
+MatterAirQuality::MatterAirQuality(EndpointId airQualityEndpointId, std::shared_ptr<AirQualitySensor> airQualitySensor)
+    : m_airQualityEndpointId(airQualityEndpointId), m_airQualitySensor(airQualitySensor)
 {
     CreateAirQualityInstance();
     AddConcentrationMeasurementInstances();
@@ -202,23 +202,23 @@ void MatterAirQuality::AddConcentrationMeasurementInstances()
       AddCarbonDioxideMeasurementInstance();
   }
 
-  if (supportedMeasurements.count(AirQualitySensor::MeasurementType::NOxIndex)) {
+  if (supportedMeasurements.count(Sensor::MeasurementType::NOx)) {
       AddNitrogenDioxideMeasurementInstance();
   }
 
-  if (supportedMeasurements.count(AirQualitySensor::MeasurementType::ParticulateMatter1p0)) {
+  if (supportedMeasurements.count(Sensor::MeasurementType::PM1p0)) {
       AddPm1MeasurementInstance();
   }
 
-  if (supportedMeasurements.count(AirQualitySensor::MeasurementType::ParticulateMatter2p5)) {
+  if (supportedMeasurements.count(Sensor::MeasurementType::PM2p5)) {
       AddPm25MeasurementInstance();
   }
 
-  if (supportedMeasurements.count(AirQualitySensor::MeasurementType::ParticulateMatter10p0)) {
+  if (supportedMeasurements.count(Sensor::MeasurementType::PM10p0)) {
       AddPm10MeasurementInstance();
   }
 
-  if (supportedMeasurements.count(AirQualitySensor::MeasurementType::VOCIndex)) {
+  if (supportedMeasurements.count(Sensor::MeasurementType::VOC)) {
       AddTotalVolatileOrganicCompoundsMeasurementInstance();
   }
 
@@ -308,7 +308,7 @@ AirQualityEnum MatterAirQuality::ClassifyAirQuality()
   return airQuality;
 }
 
-void MatterAirQuality::MeasureAirQuality()
+void MatterAirQuality::UpdateMeasurements()
 {
     // Read all measurements from the sensor
     std::vector<AirQualitySensor::Measurement> measurements = m_airQualitySensor->ReadAllMeasurements();

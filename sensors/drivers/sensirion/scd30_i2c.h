@@ -43,7 +43,7 @@
 extern "C" {
 #endif
 
-#include "../../sensors/sensirion/sensirion_config.h"
+#include "sensirion_config.h"
 #define SCD30_I2C_ADDR_61 0x61
 
 typedef enum {

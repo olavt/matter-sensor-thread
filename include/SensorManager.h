@@ -37,6 +37,8 @@ namespace SensorManager
 
   void MeasureSoundLevel();
 
+  void SensorTimerTriggered(chip::System::Layer * aLayer, void * aAppState);
+
   void ButtonActionTriggered(AppEvent * aEvent);
 
 };

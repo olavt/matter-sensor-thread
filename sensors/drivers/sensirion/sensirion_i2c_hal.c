@@ -1,9 +1,9 @@
-#include "../../sensors/sensirion/sensirion_i2c_hal.h"
+#include "sensirion_i2c_hal.h"
 
 #include "sl_i2cspm_instances.h"
 #include "ustimer.h"
-#include "../../sensors/sensirion/sensirion_common.h"
-#include "../../sensors/sensirion/sensirion_config.h"
+#include "sensirion_common.h"
+#include "sensirion_config.h"
 
 /**
  * Select the current i2c bus by index.

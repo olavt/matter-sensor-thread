@@ -1,24 +1,26 @@
 #include "SensirionSCD30.h"
 #include <stdint.h>
-#include "sensirion/scd30_i2c.h"
-#include "sensirion/sensirion_common.h"
-#include "sensirion/sensirion_i2c_hal.h"
+#include "drivers/sensirion/scd30_i2c.h"
+#include "drivers/sensirion/sensirion_common.h"
+#include "drivers/sensirion/sensirion_i2c_hal.h"
 
-void SensirionSCD30::Init()
+bool SensirionSCD30::Init()
 {
   sensirion_i2c_hal_init();
   scd30_init(SCD30_I2C_ADDR_61);
 
   AirQualitySensor::Init();
+
+  return true;
 }
 
-std::set<AirQualitySensor::MeasurementType> SensirionSCD30::GetSupportedMeasurements() const
+std::set<Sensor::MeasurementType> SensirionSCD30::GetSupportedMeasurements() const
 {
     // Return the measurement types supported by SEN66
     return {
-        AirQualitySensor::MeasurementType::AmbientHumidity,
-        AirQualitySensor::MeasurementType::AmbientTemperature,
-        AirQualitySensor::MeasurementType::CO2
+        Sensor::MeasurementType::CO2,
+        Sensor::MeasurementType::RelativeHumidity,
+        Sensor::MeasurementType::Temperature
     };
 }
 
@@ -42,9 +44,8 @@ std::vector<AirQualitySensor::Measurement> SensirionSCD30::ReadAllMeasurements()
       return measurements; // Return an empty vector on error
   }
 
-
-  measurements.push_back({MeasurementType::AmbientHumidity, humidity});
-  measurements.push_back({MeasurementType::AmbientTemperature, temperature});
+  measurements.push_back({MeasurementType::RelativeHumidity, humidity});
+  measurements.push_back({MeasurementType::Temperature, temperature});
   measurements.push_back({MeasurementType::CO2, static_cast<float>(co2_concentration)});
 
   return measurements;

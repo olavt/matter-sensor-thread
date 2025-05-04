@@ -1,30 +1,32 @@
 #include "SensirionSEN66.h"
 #include <stdint.h>
-#include "sensirion/sen66_i2c.h"
-#include "sensirion/sensirion_common.h"
-#include "sensirion/sensirion_i2c_hal.h"
+#include "drivers/sensirion/sen66_i2c.h"
+#include "drivers/sensirion/sensirion_common.h"
+#include "drivers/sensirion/sensirion_i2c_hal.h"
 
-void SensirionSEN66::Init()
+bool SensirionSEN66::Init()
 {
   sensirion_i2c_hal_init();
   sen66_init(SEN66_I2C_ADDR_6B);
 
   AirQualitySensor::Init();
+
+  return true;
 }
 
 std::set<AirQualitySensor::MeasurementType> SensirionSEN66::GetSupportedMeasurements() const
 {
     // Return the measurement types supported by SEN66
     return {
-        AirQualitySensor::MeasurementType::ParticulateMatter1p0,
-        AirQualitySensor::MeasurementType::ParticulateMatter2p5,
-        AirQualitySensor::MeasurementType::ParticulateMatter4p0,
-        AirQualitySensor::MeasurementType::ParticulateMatter10p0,
-        AirQualitySensor::MeasurementType::AmbientHumidity,
-        AirQualitySensor::MeasurementType::AmbientTemperature,
-        AirQualitySensor::MeasurementType::VOCIndex,
-        AirQualitySensor::MeasurementType::NOxIndex,
-        AirQualitySensor::MeasurementType::CO2
+        Sensor::MeasurementType::CO2,
+        Sensor::MeasurementType::PM1p0,
+        Sensor::MeasurementType::PM2p5,
+        Sensor::MeasurementType::PM4p0,
+        Sensor::MeasurementType::PM10p0,
+        Sensor::MeasurementType::RelativeHumidity,
+        Sensor::MeasurementType::Temperature,
+        Sensor::MeasurementType::VOC,
+        Sensor::MeasurementType::NOx
     };
 }
 
@@ -58,35 +60,35 @@ std::vector<AirQualitySensor::Measurement> SensirionSEN66::ReadAllMeasurements()
     }
 
     if (particulateMatter1p0 != 0xFFFF) {
-      measurements.push_back({MeasurementType::ParticulateMatter1p0, particulateMatter1p0 / 10.0f});
+      measurements.push_back({MeasurementType::PM1p0, particulateMatter1p0 / 10.0f});
     }
 
     if (particulateMatter2p5 != 0xFFFF) {
-      measurements.push_back({MeasurementType::ParticulateMatter2p5, particulateMatter2p5 / 10.0f});
+      measurements.push_back({MeasurementType::PM2p5, particulateMatter2p5 / 10.0f});
     }
 
     if (particulateMatter4p0 != 0xFFFF) {
-      measurements.push_back({MeasurementType::ParticulateMatter4p0, particulateMatter4p0 / 10.0f});
+      measurements.push_back({MeasurementType::PM4p0, particulateMatter4p0 / 10.0f});
     }
 
     if (particulateMatter10p0 != 0xFFFF) {
-      measurements.push_back({MeasurementType::ParticulateMatter10p0, particulateMatter10p0 / 10.0f});
+      measurements.push_back({MeasurementType::PM10p0, particulateMatter10p0 / 10.0f});
     }
 
     if (ambientHumidity != 0x7FFF) {
-      measurements.push_back({MeasurementType::AmbientHumidity, ambientHumidity / 100.0f});
+      measurements.push_back({MeasurementType::RelativeHumidity, ambientHumidity / 100.0f});
     }
 
     if (ambientTemperature != 0x7FFF) {
-      measurements.push_back({MeasurementType::AmbientTemperature, ambientTemperature / 200.0f});
+      measurements.push_back({MeasurementType::Temperature, ambientTemperature / 200.0f});
     }
 
     if (vocIndex != 0x7FFF) {
-      measurements.push_back({MeasurementType::VOCIndex, vocIndex / 10.0f});
+      measurements.push_back({MeasurementType::VOC, vocIndex / 10.0f});
     }
 
     if (noxIndex != 0x7FFF) {
-      measurements.push_back({MeasurementType::NOxIndex, noxIndex / 10.0f});
+      measurements.push_back({MeasurementType::NOx, noxIndex / 10.0f});
     }
 
     if (co2 != 0xFFFF) {

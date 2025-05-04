@@ -32,7 +32,7 @@
 #ifndef SENSIRION_COMMON_H
 #define SENSIRION_COMMON_H
 
-#include "../../sensors/sensirion/sensirion_config.h"
+#include "sensirion_config.h"
 
 #ifdef __cplusplus
 extern "C" {

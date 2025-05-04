@@ -1,35 +1,13 @@
 #pragma once
 
-#include <cstdint>
-#include <optional>
-#include <set>
-#include <string>
-#include <vector>
+#include "sensor.h"
 
-class AirQualitySensor
+
+class AirQualitySensor : public Sensor
 {
+
 public:
-    // Enum to define all possible measurement types
-    enum class MeasurementType {
-        ParticulateMatter1p0,
-        ParticulateMatter2p5,
-        ParticulateMatter4p0,
-        ParticulateMatter10p0,
-        AmbientHumidity,
-        AmbientTemperature,
-        VOCIndex,
-        NOxIndex,
-        CO2
-    };
 
-    // Convert MeasurementType to string
-    static std::string MeasurementTypeToString(MeasurementType type);
-
-    // Struct to hold a single measurement value and its type
-    struct Measurement {
-        MeasurementType type;
-        float value;
-    };
 
     // Constructor
     explicit AirQualitySensor(float sensorAltitude = 0.0f)
@@ -41,14 +19,10 @@ public:
     virtual ~AirQualitySensor() = default;
 
     // Initialize the sensor
-    virtual void Init() = 0;
+    bool Init() override;
 
     // Get the set of measurement types supported by this sensor
     virtual std::set<MeasurementType> GetSupportedMeasurements() const = 0;
-
-    // Read all supported measurements
-    // Returns a vector of Measurement structs for all available measurements
-    virtual std::vector<Measurement> ReadAllMeasurements() = 0;
 
     // Start continuous measurement mode (if supported)
     // Returns 0 on success, non-zero on failure

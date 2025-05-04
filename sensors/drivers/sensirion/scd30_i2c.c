@@ -36,11 +36,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../sensors/sensirion/scd30_i2c.h"
+#include "scd30_i2c.h"
 
-#include "../../sensors/sensirion/sensirion_common.h"
-#include "../../sensors/sensirion/sensirion_i2c.h"
-#include "../../sensors/sensirion/sensirion_i2c_hal.h"
+#include "sensirion_common.h"
+#include "sensirion_i2c.h"
+#include "sensirion_i2c_hal.h"
 
 #define sensirion_hal_sleep_us sensirion_i2c_hal_sleep_usec
 

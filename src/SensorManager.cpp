@@ -18,6 +18,10 @@
 #include <SensorManager.h>
 #include "AirQualitySensor.h"
 #include "MatterAirQuality.h"
+#include "MatterHumidity.h"
+#include "MatterLightSensor.h"
+#include "MatterPressureSensor.h"
+#include "MatterTemperature.h"
 #include "CO2Sensor.h"
 #include "SensirionSCD30.h"
 
@@ -29,28 +33,25 @@ using namespace chip::Protocols::InteractionModel;
 
 #define TEMPERATURE_SENSOR_ENDPOINT 1
 #define HUMIDITY_SENSOR_ENDPOINT 2
-#define ILLUMINANCE_SENSOR_ENDPOINT 3
+#define LIGHT_SENSOR_ENDPOINT 3
 #define PRESSURE_SENSOR_ENDPOINT 4
 #define AIR_QUALITY_SENSOR_ENDPOINT 5
 
 constexpr chip::System::Clock::Seconds32 kSensorReadPeriod = chip::System::Clock::Seconds32(SL_MATTER_SENSOR_TIMER_PERIOD_S);
 
-BMP3xxPressureSensor pressureSensor;
-Si70xxTemperatureHumiditySensor temperatureHumiditySensor;
-VEML6035AmbientLightSensor illuminanceSensor;
-//Co2Sensor* co2Sensor;
-AirQualitySensor* airQualitySensor;
-MatterAirQuality* matterAirQuality;
+std::shared_ptr<BMP3xxPressureSensor> pressureSensor;
+std::shared_ptr<Si70xxTemperatureHumiditySensor> temperatureHumiditySensor;
+std::shared_ptr<VEML6035AmbientLightSensor> ambientLightSensor;
+
+std::unique_ptr<MatterTemperature> matterTemperature;
+std::unique_ptr<MatterHumidity> matterHumidity;
+std::unique_ptr<MatterLightSensor> matterLightSensor;
+std::unique_ptr<MatterPressureSensor> matterPressureSensor;
+std::unique_ptr<MatterAirQuality> matterAirQuality;
+
 
 namespace SensorManager
 {
-
-void SensorTimerTriggered(chip::System::Layer * aLayer, void * aAppState)
-{
-  UpdateMeasurements();
-
-  aLayer->StartTimer(kSensorReadPeriod, SensorTimerTriggered, nullptr);
-}
 
 CHIP_ERROR Init()
 {
@@ -61,9 +62,20 @@ CHIP_ERROR Init()
 
     vTaskDelay(pdMS_TO_TICKS(1000));
 
-    illuminanceSensor.Init();
-    pressureSensor.Init();
-    temperatureHumiditySensor.Init();
+    //TemperatureSensor temperatureSensor = temperatureHumiditySensor;
+
+    pressureSensor = std::make_shared<BMP3xxPressureSensor>();
+    pressureSensor->Init();
+
+    temperatureHumiditySensor = std::make_shared<Si70xxTemperatureHumiditySensor>();
+    temperatureHumiditySensor->Init();
+
+    ambientLightSensor = std::make_shared<VEML6035AmbientLightSensor>();
+    ambientLightSensor->Init();
+
+    auto airQualitySensor = std::make_shared<SensirionSCD30>(610.0);
+    airQualitySensor->Init();
+
     //microphone.Init();
 
     //char instanceName[] = "exp";
@@ -76,93 +88,25 @@ CHIP_ERROR Init()
 
     //delete co2Sensor;
 
-    AirQualitySensor* airQualitySensor = new SensirionSCD30(610.0);
-    airQualitySensor->Init();
+    matterTemperature = std::make_unique<MatterTemperature>(TEMPERATURE_SENSOR_ENDPOINT, temperatureHumiditySensor);
 
-    matterAirQuality = new MatterAirQuality(airQualitySensor, AIR_QUALITY_SENSOR_ENDPOINT);
+    matterHumidity = std::make_unique<MatterHumidity>(HUMIDITY_SENSOR_ENDPOINT, temperatureHumiditySensor);
+
+    matterLightSensor = std::make_unique<MatterLightSensor>(LIGHT_SENSOR_ENDPOINT, ambientLightSensor);
+
+    matterPressureSensor = std::make_unique<MatterPressureSensor>(PRESSURE_SENSOR_ENDPOINT, pressureSensor);
+
+    matterAirQuality = std::make_unique<MatterAirQuality>(AIR_QUALITY_SENSOR_ENDPOINT, airQualitySensor);
     matterAirQuality->StartMeasurements();
 
-    SensorTimerTriggered(&chip::DeviceLayer::SystemLayer(), nullptr);
+    // Schedule the first execution of SensorTimerTriggered.
+    // ScheduleWork is done to make sure it executes from the Matter task
+    VerifyOrDieWithMsg(DeviceLayer::PlatformMgr().ScheduleWork([](intptr_t arg) {
+      SensorTimerTriggered(&chip::DeviceLayer::SystemLayer(), nullptr);
+    }) == CHIP_NO_ERROR,
+                       AppServer, "Failed to schedule the first SensorCallback!");
 
     return status;
-}
-
-void UpdatePressureMeasuredValue(float measuredPressureKiloPascal)
-{
-  int16_t measuredValue = (measuredPressureKiloPascal * 10 + 0.5);
-  SILABS_LOG("[INFO] UpdatePressureMeasuredValue: measuredValue=%d", measuredValue);
-
-  //chip::DeviceLayer::PlatformMgr().LockChipStack();
-
-  int8_t scale;
-  chip::app::Clusters::PressureMeasurement::Attributes::Scale::Get(PRESSURE_SENSOR_ENDPOINT, &scale);
-  float scaleFactor = std::pow(10.0, scale);
-  int16_t scaledValue = (measuredPressureKiloPascal * scaleFactor + 0.5);
-  SILABS_LOG("[INFO] UpdatePressureMeasuredValue: scaledValue=%d", scaledValue);
-  chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(PRESSURE_SENSOR_ENDPOINT, measuredValue);
-  chip::app::Clusters::PressureMeasurement::Attributes::ScaledValue::Set(PRESSURE_SENSOR_ENDPOINT, scaledValue);
-
-  //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-}
-
-void UpdateTemperatureMeasuredValue(EndpointId endpoint, float temperatureCelsius)
-{
-  int16_t reportedTemperature = (temperatureCelsius * 100 + 0.5);
-  SILABS_LOG("[INFO] UpdateTemperatureMeasuredValue: reportedTemperature=%d", reportedTemperature);
-  //chip::DeviceLayer::PlatformMgr().LockChipStack();
-  chip::app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(endpoint, reportedTemperature);
-  //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-}
-
-void UpdateHumidityMeasuredValue(EndpointId endpoint, float relativeHumidity)
-{
-  SILABS_LOG("[INFO] UpdateHumidityMeasuredValue: relativeHumidity=%f", relativeHumidity);
-  //chip::DeviceLayer::PlatformMgr().LockChipStack();
-  chip::app::Clusters::RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(endpoint, relativeHumidity * 100);
-  //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-}
-
-void UpdateRelativeHumidityMeasurement()
-{
-  float measuredRelativeHumidity;
-  if (temperatureHumiditySensor.MeasureRelativeHumidity(&measuredRelativeHumidity))
-  {
-      SILABS_LOG("[INFO] Updating humidity measurement.");
-
-      UpdateHumidityMeasuredValue(HUMIDITY_SENSOR_ENDPOINT, measuredRelativeHumidity);
-  }
-}
-
-void UpdateIlluminanceMeasurement()
-{
-  float measuredLux;
-  if (illuminanceSensor.MeasureIllumination(&measuredLux))
-  {
-      SILABS_LOG("[INFO] Updating illuminance measurement.");
-
-      // This attribute SHALL indicate the illuminance in Lux (symbol lx) as follows:
-      // MeasuredValue = 10,000 x log10(illuminance) + 1,
-      double value = 10000 * log10(measuredLux) + 1;
-      uint16_t measuredValue = static_cast<uint16_t>(value);
-
-      //chip::DeviceLayer::PlatformMgr().LockChipStack();
-      chip::app::Clusters::IlluminanceMeasurement::Attributes::MeasuredValue::Set(ILLUMINANCE_SENSOR_ENDPOINT, measuredValue);
-      //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-  }
-}
-
-void UpdateTemperatureMeasurement()
-{
-  float temperatureCelsius;
-  if (temperatureHumiditySensor.MeasureTemperature(&temperatureCelsius))
-    UpdateTemperatureMeasuredValue(TEMPERATURE_SENSOR_ENDPOINT, temperatureCelsius);
-}
-
-void UpdatePressureMeasurement()
-{
-  float measuredPressure;
-  if (pressureSensor.MeasurePressure(&measuredPressure))
-    UpdatePressureMeasuredValue(measuredPressure);
 }
 
 void MeasureSoundLevel()
@@ -171,20 +115,30 @@ void MeasureSoundLevel()
   //microphone.MeasureSoundLevel(&measuredSoundLevel);
 }
 
-void UpdateAirQualityMeasurements()
-{
-  matterAirQuality->MeasureAirQuality();
-}
-
 void UpdateMeasurements()
 {
   SILABS_LOG("[INFO] Updating measurements.");
-  UpdateAirQualityMeasurements();
-  //UpdateIlluminanceMeasurement();
-  //UpdateRelativeHumidityMeasurement();
-  //UpdateTemperatureMeasurement();
-  //UpdatePressureMeasurement();
-  //MeasureSoundLevel();
+
+  matterTemperature->UpdateMeasurements();
+  matterHumidity->UpdateMeasurements();
+  matterLightSensor->UpdateMeasurements();
+  matterPressureSensor->UpdateMeasurements();
+  matterAirQuality->UpdateMeasurements();
+
+  MeasureSoundLevel();
+}
+
+// This function executes from the Matter task. The use of LockChipStack / UnlockChipStack
+// is not required when updating matter attributes
+void SensorTimerTriggered(chip::System::Layer * aLayer, void * aAppState)
+{
+  UpdateMeasurements();
+
+  // The chip::System::Layer::StartTimer will execute the function from the Matter task
+  CHIP_ERROR err = aLayer->StartTimer(kSensorReadPeriod, SensorTimerTriggered, nullptr);
+  if (err != CHIP_NO_ERROR) {
+      SILABS_LOG("[ERROR] Failed to start sensor timer: %s", chip::ErrorStr(err));
+  }
 }
 
 void ButtonActionTriggered(AppEvent * aEvent)
