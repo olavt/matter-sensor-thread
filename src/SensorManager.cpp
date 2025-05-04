@@ -5,12 +5,7 @@
  *      Author: olavt
  */
 
-#include <cmath>
 #include <platform/CHIPDeviceLayer.h>
-#include <app-common/zap-generated/attributes/Accessors.h>
-#include <app-common/zap-generated/ids/Attributes.h>
-#include <app-common/zap-generated/ids/Clusters.h>
-#include <platform/silabs/platformAbstraction/SilabsPlatform.h>
 
 #include "sl_matter_sensor_config.h"
 #include "silabs_utils.h"
