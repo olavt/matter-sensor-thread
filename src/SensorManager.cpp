@@ -5,18 +5,17 @@
  *      Author: olavt
  */
 
+#include <MatterAirQualitySensor.h>
 #include <MatterHumiditySensor.h>
+#include <MatterLightSensor.h>
+#include <MatterPressureSensor.h>
+#include <MatterTemperatureSensor.h>
 #include <platform/CHIPDeviceLayer.h>
-
 #include "sl_matter_sensor_config.h"
 #include "silabs_utils.h"
 
 #include <SensorManager.h>
 #include "AirQualitySensor.h"
-#include "MatterAirQuality.h"
-#include "MatterLightSensor.h"
-#include "MatterPressureSensor.h"
-#include "MatterTemperature.h"
 #include "CO2Sensor.h"
 #include "SensirionSCD30.h"
 
@@ -35,11 +34,11 @@ std::shared_ptr<BMP3xxPressureSensor> pressureSensor;
 std::shared_ptr<Si70xxTemperatureHumiditySensor> temperatureHumiditySensor;
 std::shared_ptr<VEML6035AmbientLightSensor> ambientLightSensor;
 
-std::unique_ptr<MatterTemperature> matterTemperature;
+std::unique_ptr<MatterTemperatureSensor> matterTemperature;
 std::unique_ptr<MatterHumiditySensor> matterHumidity;
 std::unique_ptr<MatterLightSensor> matterLightSensor;
 std::unique_ptr<MatterPressureSensor> matterPressureSensor;
-std::unique_ptr<MatterAirQuality> matterAirQuality;
+std::unique_ptr<MatterAirQualitySensor> matterAirQuality;
 
 
 namespace SensorManager
@@ -80,16 +79,23 @@ CHIP_ERROR Init()
 
     //delete co2Sensor;
 
-    matterTemperature = std::make_unique<MatterTemperature>(TEMPERATURE_SENSOR_ENDPOINT, temperatureHumiditySensor);
+    // Create the classes to handle each endpoint.
+    // The ZAP-file will contain matching definitions.
 
+    // Endpoint 1: Temperature Sensor Device
+    matterTemperature = std::make_unique<MatterTemperatureSensor>(TEMPERATURE_SENSOR_ENDPOINT, temperatureHumiditySensor);
+
+    // Endpoint 2: Humidity Sensor Device
     matterHumidity = std::make_unique<MatterHumiditySensor>(HUMIDITY_SENSOR_ENDPOINT, temperatureHumiditySensor);
 
+    // Endpoint 3: Light Sensor Device
     matterLightSensor = std::make_unique<MatterLightSensor>(LIGHT_SENSOR_ENDPOINT, ambientLightSensor);
 
+    // Endpoint 4: Pressure Sensor Device
     matterPressureSensor = std::make_unique<MatterPressureSensor>(PRESSURE_SENSOR_ENDPOINT, pressureSensor);
 
-    matterAirQuality = std::make_unique<MatterAirQuality>(AIR_QUALITY_SENSOR_ENDPOINT, airQualitySensor);
-    matterAirQuality->StartMeasurements();
+    // Endpoint 6: Air Quality Device
+    matterAirQuality = std::make_unique<MatterAirQualitySensor>(AIR_QUALITY_SENSOR_ENDPOINT, airQualitySensor);
 
     // Schedule the first execution of SensorTimerTriggered.
     // ScheduleWork is done to make sure it executes from the Matter task
@@ -110,6 +116,12 @@ void MeasureSoundLevel()
 void UpdateMeasurements()
 {
   SILABS_LOG("[INFO] Updating measurements.");
+
+  auto ambientPressure = pressureSensor->MeasureBarometricPressure();
+  if (ambientPressure)
+    {
+      matterAirQuality->SetAmbientPressure(ambientPressure.value());
+    }
 
   matterTemperature->UpdateMeasurements();
   matterHumidity->UpdateMeasurements();

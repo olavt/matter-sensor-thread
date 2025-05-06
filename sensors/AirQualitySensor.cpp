@@ -3,7 +3,7 @@
 
 bool AirQualitySensor::Init()
 {
-    SetSensorAltitude(m_sensorAltitude);
+    SetAltitude(m_sensorAltitude);
 
     return true;
 }

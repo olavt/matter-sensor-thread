@@ -1,10 +1,3 @@
-/*
- * MatterPressureSensor.h
- *
- *  Created on: May 4, 2025
- *      Author: olavt
- */
-
 #pragma once
 
 #include "BarometricPressureSensor.h"

@@ -1,10 +1,3 @@
-/*
- * MatterAirQuality.h
- *
- *  Created on: Apr 29, 2025
- *      Author: olavt
- */
-
 #pragma once
 
 #include <unordered_map>
@@ -26,13 +19,16 @@ using namespace chip::app::Clusters::AirQuality;
 using namespace chip::DeviceLayer::Silabs;
 using namespace chip::Protocols::InteractionModel;
 
-class MatterAirQuality
+// An air quality sensor is a device designed to monitor and measure various parameters related to
+// the quality of ambient air in indoor or outdoor environments.
+
+class MatterAirQualitySensor
 {
     public:
 
-        MatterAirQuality(EndpointId airQualityEndpointId, std::shared_ptr<AirQualitySensor> airQualitySensor);
+        MatterAirQualitySensor(EndpointId airQualityEndpointId, std::shared_ptr<AirQualitySensor> airQualitySensor);
 
-        void StartMeasurements();
+        void SetAmbientPressure(float ambientPressureKiloPascal);
 
         void UpdateMeasurements();
 

@@ -1,10 +1,3 @@
-/*
- * MatterLightSensor.h
- *
- *  Created on: May 4, 2025
- *      Author: olavt
- */
-
 #pragma once
 
 #include "AmbientLightSensor.h"
@@ -14,6 +7,9 @@
 #include <app-common/zap-generated/ids/Clusters.h>
 
 using namespace chip;
+
+// A Light Sensor device is a measurement and sensing device that is capable of measuring and
+// reporting the intensity of light (illuminance) to which the sensor is being subjected.
 
 class MatterLightSensor
 {

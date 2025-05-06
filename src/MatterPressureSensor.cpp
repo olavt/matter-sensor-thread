@@ -1,14 +1,6 @@
-/*
- * MatterPressureSensor.cpp
- *
- *  Created on: May 4, 2025
- *      Author: olavt
- */
-
-#include "MatterPressureSensor.h"
-
 #include <cmath>
 #include <app-common/zap-generated/attributes/Accessors.h>
+#include <MatterPressureSensor.h>
 #include "silabs_utils.h"
 
 MatterPressureSensor::MatterPressureSensor(EndpointId pressureSensorEndpointId, std::shared_ptr<BarometricPressureSensor> barometricPressureSensor)

@@ -1,10 +1,3 @@
-/*
- * MatterHumidity.h
- *
- *  Created on: May 4, 2025
- *      Author: olavt
- */
-
 #pragma once
 
 #include "RelativeHumiditySensor.h"
@@ -14,6 +7,8 @@
 #include <app-common/zap-generated/ids/Clusters.h>
 
 using namespace chip;
+
+// A humidity sensor (in most cases a Relative humidity sensor) device reports humidity measurements.
 
 class MatterHumiditySensor
 {

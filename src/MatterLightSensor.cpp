@@ -1,14 +1,6 @@
-/*
- * MatterLightSensor.cpp
- *
- *  Created on: May 4, 2025
- *      Author: olavt
- */
-
-#include "MatterLightSensor.h"
-
 #include <cmath>
 #include <app-common/zap-generated/attributes/Accessors.h>
+#include <MatterLightSensor.h>
 #include "silabs_utils.h"
 
 MatterLightSensor::MatterLightSensor(EndpointId lightSensorEndpointId, std::shared_ptr<AmbientLightSensor> ambientLightSensor)

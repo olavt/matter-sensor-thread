@@ -1,18 +1,8 @@
-/*
- * MatterAirQuality.cpp
- *
- *  Created on: Apr 29, 2025
- *      Author: olavt
- */
-
-#include "MatterAirQuality.h"
-
-#include "silabs_utils.h"
-
 #include <platform/CHIPDeviceLayer.h>
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <app-common/zap-generated/ids/Clusters.h>
-#include <platform/silabs/platformAbstraction/SilabsPlatform.h>
+#include <MatterAirQualitySensor.h>
+#include "silabs_utils.h"
 
 using namespace chip;
 using namespace chip::app;
@@ -21,7 +11,7 @@ using namespace chip::app::Clusters;
 using namespace chip::app::Clusters::AirQuality;
 
 // Initialize measurementTypeToClusterId
-const std::unordered_map<AirQualitySensor::MeasurementType, uint32_t> MatterAirQuality::measurementTypeToClusterId = {
+const std::unordered_map<AirQualitySensor::MeasurementType, uint32_t> MatterAirQualitySensor::measurementTypeToClusterId = {
     {Sensor::MeasurementType::RelativeHumidity, RelativeHumidityMeasurement::Id},
     {Sensor::MeasurementType::Temperature, TemperatureMeasurement::Id},
     {Sensor::MeasurementType::CO2, CarbonDioxideConcentrationMeasurement::Id},
@@ -33,7 +23,7 @@ const std::unordered_map<AirQualitySensor::MeasurementType, uint32_t> MatterAirQ
 };
 
 // Initialize clusterIdToMeasurementType (reverse mapping)
-const std::unordered_map<uint32_t, AirQualitySensor::MeasurementType> MatterAirQuality::clusterIdToMeasurementType = {
+const std::unordered_map<uint32_t, AirQualitySensor::MeasurementType> MatterAirQualitySensor::clusterIdToMeasurementType = {
     {RelativeHumidityMeasurement::Id, Sensor::MeasurementType::RelativeHumidity},
     {TemperatureMeasurement::Id, Sensor::MeasurementType::RelativeHumidity},
     {CarbonDioxideConcentrationMeasurement::Id, Sensor::MeasurementType::CO2},
@@ -44,7 +34,7 @@ const std::unordered_map<uint32_t, AirQualitySensor::MeasurementType> MatterAirQ
     {Pm10ConcentrationMeasurement::Id, Sensor::MeasurementType::PM10p0}
 };
 
-std::unordered_map<AirQualitySensor::MeasurementType, ConcentrationMeasurement::Instance<true, true, true, true, true, true>*> MatterAirQuality::measurementTypeToInstance;
+std::unordered_map<AirQualitySensor::MeasurementType, ConcentrationMeasurement::Instance<true, true, true, true, true, true>*> MatterAirQualitySensor::measurementTypeToInstance;
 
 // Returns the elapsed seconds since boot of the device
 float getElapsedSeconds()
@@ -58,19 +48,19 @@ float getElapsedSeconds()
   return elapsedSeconds;
 }
 
-MatterAirQuality::MatterAirQuality(EndpointId airQualityEndpointId, std::shared_ptr<AirQualitySensor> airQualitySensor)
+MatterAirQualitySensor::MatterAirQualitySensor(EndpointId airQualityEndpointId, std::shared_ptr<AirQualitySensor> airQualitySensor)
     : m_airQualityEndpointId(airQualityEndpointId), m_airQualitySensor(airQualitySensor)
 {
     CreateAirQualityInstance();
     AddConcentrationMeasurementInstances();
 }
 
-void MatterAirQuality::StartMeasurements()
+void MatterAirQualitySensor::SetAmbientPressure(float ambientPressureKiloPascal)
 {
-    m_airQualitySensor->StartContinuousMeasurement();
+  m_airQualitySensor->SetAmbientPressure(ambientPressureKiloPascal);
 }
 
-void MatterAirQuality::CreateAirQualityInstance()
+void MatterAirQualitySensor::CreateAirQualityInstance()
 {
   m_measurements.AddId(RelativeHumidityMeasurement::Id, 60, 60);
   m_measurements.AddId(TemperatureMeasurement::Id, 60, 60);
@@ -89,7 +79,7 @@ void MatterAirQuality::CreateAirQualityInstance()
   m_airQualityInstance->Init();
 }
 
-void MatterAirQuality::AddConcentrationMeasurementInstance(
+void MatterAirQualitySensor::AddConcentrationMeasurementInstance(
     uint32_t clusterId,
     ConcentrationMeasurement::MeasurementMediumEnum medium,
     ConcentrationMeasurement::MeasurementUnitEnum unit,
@@ -125,7 +115,7 @@ void MatterAirQuality::AddConcentrationMeasurementInstance(
     measurementTypeToInstance.emplace(measurementType, instance);
 }
 
-void MatterAirQuality::AddCarbonDioxideMeasurementInstance()
+void MatterAirQualitySensor::AddCarbonDioxideMeasurementInstance()
 {
     AddConcentrationMeasurementInstance(
         CarbonDioxideConcentrationMeasurement::Id,
@@ -136,7 +126,7 @@ void MatterAirQuality::AddCarbonDioxideMeasurementInstance()
         );
 }
 
-void MatterAirQuality::AddNitrogenDioxideMeasurementInstance()
+void MatterAirQualitySensor::AddNitrogenDioxideMeasurementInstance()
 {
   AddConcentrationMeasurementInstance(
       NitrogenDioxideConcentrationMeasurement::Id,
@@ -147,7 +137,7 @@ void MatterAirQuality::AddNitrogenDioxideMeasurementInstance()
       );
 }
 
-void MatterAirQuality::AddPm1MeasurementInstance()
+void MatterAirQualitySensor::AddPm1MeasurementInstance()
 {
   AddConcentrationMeasurementInstance(
       Pm1ConcentrationMeasurement::Id,
@@ -158,7 +148,7 @@ void MatterAirQuality::AddPm1MeasurementInstance()
       );
   }
 
-void MatterAirQuality::AddPm25MeasurementInstance()
+void MatterAirQualitySensor::AddPm25MeasurementInstance()
 {
   AddConcentrationMeasurementInstance(
       Pm25ConcentrationMeasurement::Id,
@@ -169,7 +159,7 @@ void MatterAirQuality::AddPm25MeasurementInstance()
       );
 }
 
-void MatterAirQuality::AddPm10MeasurementInstance()
+void MatterAirQualitySensor::AddPm10MeasurementInstance()
 {
   AddConcentrationMeasurementInstance(
       Pm10ConcentrationMeasurement::Id,
@@ -180,7 +170,7 @@ void MatterAirQuality::AddPm10MeasurementInstance()
       );
 }
 
-void MatterAirQuality::AddTotalVolatileOrganicCompoundsMeasurementInstance()
+void MatterAirQualitySensor::AddTotalVolatileOrganicCompoundsMeasurementInstance()
 {
   AddConcentrationMeasurementInstance(
       TotalVolatileOrganicCompoundsConcentrationMeasurement::Id,
@@ -191,7 +181,7 @@ void MatterAirQuality::AddTotalVolatileOrganicCompoundsMeasurementInstance()
       );
 }
 
-void MatterAirQuality::AddConcentrationMeasurementInstances()
+void MatterAirQualitySensor::AddConcentrationMeasurementInstances()
 {
   // Add Concentration Measurement Clusters
   std::set<AirQualitySensor::MeasurementType> supportedMeasurements = m_airQualitySensor->GetSupportedMeasurements();
@@ -224,7 +214,7 @@ void MatterAirQuality::AddConcentrationMeasurementInstances()
 
 }
 
-AirQualityEnum MatterAirQuality::ClassifyAirQualityByCO2()
+AirQualityEnum MatterAirQualitySensor::ClassifyAirQualityByCO2()
 {
   uint16_t co2_ppm = m_measurements.GetLatest(CarbonDioxideConcentrationMeasurement::Id);
 
@@ -251,7 +241,7 @@ AirQualityEnum MatterAirQuality::ClassifyAirQualityByCO2()
   return AirQualityEnum::kUnknown;
 }
 
-AirQualityEnum MatterAirQuality::ClassifyAirQualityByPM10()
+AirQualityEnum MatterAirQualitySensor::ClassifyAirQualityByPM10()
 {
     uint16_t pm10 = m_measurements.GetAverage(Pm10ConcentrationMeasurement::Id);
 
@@ -270,7 +260,7 @@ AirQualityEnum MatterAirQuality::ClassifyAirQualityByPM10()
     }
 }
 
-AirQualityEnum MatterAirQuality::ClassifyAirQualityByPM25()
+AirQualityEnum MatterAirQualitySensor::ClassifyAirQualityByPM25()
 {
     uint16_t pm25 = m_measurements.GetAverage(Pm25ConcentrationMeasurement::Id);
 
@@ -289,7 +279,7 @@ AirQualityEnum MatterAirQuality::ClassifyAirQualityByPM25()
     }
 }
 
-AirQualityEnum MatterAirQuality::ClassifyAirQuality()
+AirQualityEnum MatterAirQualitySensor::ClassifyAirQuality()
 {
   // Classify air quality based on the measured substances
 
@@ -308,7 +298,7 @@ AirQualityEnum MatterAirQuality::ClassifyAirQuality()
   return airQuality;
 }
 
-void MatterAirQuality::UpdateMeasurements()
+void MatterAirQualitySensor::UpdateMeasurements()
 {
     // Read all measurements from the sensor
     std::vector<AirQualitySensor::Measurement> measurements = m_airQualitySensor->ReadAllMeasurements();
@@ -349,9 +339,9 @@ void MatterAirQuality::UpdateMeasurements()
     DeviceLayer::PlatformMgr().ScheduleWork(UpdateAirQualityAttributes, reinterpret_cast<intptr_t>(this));
 }
 
-void MatterAirQuality::UpdateAirQualityAttributes(intptr_t context)
+void MatterAirQualitySensor::UpdateAirQualityAttributes(intptr_t context)
 {
-    MatterAirQuality* matterAirQuality = reinterpret_cast<MatterAirQuality*>(context);
+    MatterAirQualitySensor* matterAirQuality = reinterpret_cast<MatterAirQualitySensor*>(context);
     std::vector<uint32_t> clusterIds = matterAirQuality->m_measurements.GetIds();
     for (uint32_t clusterId : clusterIds) {
         if (clusterId == RelativeHumidityMeasurement::Id)
@@ -399,13 +389,13 @@ void MatterAirQuality::UpdateAirQualityAttributes(intptr_t context)
 
 }
 
-void MatterAirQuality::UpdateHumidityMeasuredValue(float relativeHumidity)
+void MatterAirQualitySensor::UpdateHumidityMeasuredValue(float relativeHumidity)
 {
   SILABS_LOG("[INFO] UpdateHumidityMeasuredValue: relativeHumidity=%f", relativeHumidity);
   chip::app::Clusters::RelativeHumidityMeasurement::Attributes::MeasuredValue::Set(m_airQualityEndpointId, relativeHumidity * 100);
 }
 
-void MatterAirQuality::UpdateTemperatureMeasuredValue(float temperatureCelsius)
+void MatterAirQualitySensor::UpdateTemperatureMeasuredValue(float temperatureCelsius)
 {
   int16_t reportedTemperature = (temperatureCelsius * 100 + 0.5);
   SILABS_LOG("[INFO] UpdateTemperatureMeasuredValue: reportedTemperature=%d", reportedTemperature);

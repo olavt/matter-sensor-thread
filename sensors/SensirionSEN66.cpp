@@ -1,4 +1,6 @@
 #include "SensirionSEN66.h"
+
+#include <cmath>
 #include <stdint.h>
 #include "drivers/sensirion/sen66_i2c.h"
 #include "drivers/sensirion/sensirion_common.h"
@@ -10,6 +12,9 @@ bool SensirionSEN66::Init()
   sen66_init(SEN66_I2C_ADDR_6B);
 
   AirQualitySensor::Init();
+
+  ActivateAutomaticSelfCalibration();
+  StartContinuousMeasurement();
 
   return true;
 }
@@ -98,9 +103,35 @@ std::vector<AirQualitySensor::Measurement> SensirionSEN66::ReadAllMeasurements()
     return measurements;
 }
 
-int SensirionSEN66::SetSensorAltitude(float altitude)
+int SensirionSEN66::ActivateAutomaticSelfCalibration()
+{
+  int16_t status = sen66_set_co2_sensor_automatic_self_calibration(1);
+  return status;
+}
+
+// Sets the current sensor altitude. The sensor altitude can be used for pressure compensation in the
+// CO2 sensor. The default sensor altitude value is set to 0 meters above sea level. Valid input values
+// are between 0 and 3000m.
+// This configuration is volatile, i.e. the parameter will be reverted to its default value after a device reset.
+int SensirionSEN66::SetAltitude(float altitude)
 {
   int16_t status = sen66_set_sensor_altitude(altitude);
+  return status;
+}
+
+// Sets the ambient pressure value. The ambient pressure can be used for pressure compensation in
+// the CO2 sensor. Setting an ambient pressure overrides any pressure compensation based on a previously set
+// sensor altitude. Use of this command is recommended for applications experiencing significant ambient
+// pressure changes to ensure CO2 sensor accuracy. Valid input values are between 700 to 1’200 hPa. The default
+// value is 1013 hPa.
+// This configuration is volatile, i.e. the parameter will be reverted to its default value after a device reset.
+int SensirionSEN66::SetAmbientPressure(float ambientPressureKiloPascal)
+{
+  // Round the float to the nearest integer and convert to uint16_t
+  uint16_t pressureHektoPascal = static_cast<uint16_t>(std::round(ambientPressureKiloPascal * 10.0f));
+
+  int16_t status = sen66_set_ambient_pressure(pressureHektoPascal);
+
   return status;
 }
 

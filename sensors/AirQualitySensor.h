@@ -24,13 +24,15 @@ public:
     // Get the set of measurement types supported by this sensor
     virtual std::set<MeasurementType> GetSupportedMeasurements() const = 0;
 
-    // Start continuous measurement mode (if supported)
-    // Returns 0 on success, non-zero on failure
-    virtual int StartContinuousMeasurement() = 0;
+    virtual int ActivateAutomaticSelfCalibration() = 0;
+
+    virtual int SetAmbientPressure(float ambientPressureKiloPascal) = 0;
 
 protected:
-    // Set sensor altitude (protected, as it’s implementation-specific)
-    virtual int SetSensorAltitude(float sensorAltitude) = 0;
+
+    virtual int SetAltitude(float altitude) = 0;
+
+    virtual int StartContinuousMeasurement() = 0;
 
     float m_sensorAltitude;
 };

@@ -1,4 +1,6 @@
 #include "SensirionSCD30.h"
+
+#include <cmath>
 #include <stdint.h>
 #include "drivers/sensirion/scd30_i2c.h"
 #include "drivers/sensirion/sensirion_common.h"
@@ -10,6 +12,9 @@ bool SensirionSCD30::Init()
   scd30_init(SCD30_I2C_ADDR_61);
 
   AirQualitySensor::Init();
+
+  ActivateAutomaticSelfCalibration();
+  StartContinuousMeasurement();
 
   return true;
 }
@@ -51,15 +56,32 @@ std::vector<AirQualitySensor::Measurement> SensirionSCD30::ReadAllMeasurements()
   return measurements;
 }
 
-int SensirionSCD30::SetSensorAltitude(float altitude)
+int SensirionSCD30::ActivateAutomaticSelfCalibration()
+{
+  int16_t status = scd30_activate_auto_calibration(1);
+  return status;
+}
+
+int SensirionSCD30::SetAltitude(float altitude)
 {
   int16_t status = scd30_set_altitude_compensation(altitude);
   return status;
 }
 
+int SensirionSCD30::SetAmbientPressure(float ambientPressureKiloPascal)
+{
+  // Round the float to the nearest integer and convert to uint16_t
+  uint16_t pressureHektoPascal = static_cast<uint16_t>(std::round(ambientPressureKiloPascal * 10.0f));
+
+  int16_t status = scd30_start_periodic_measurement(pressureHektoPascal);
+
+  return status;
+}
+
 int SensirionSCD30::StartContinuousMeasurement()
 {
-  int16_t status = scd30_start_periodic_measurement(0);
+  uint16_t ambient_pressure = 0; // Disable pressure compensation
+  int16_t status = scd30_start_periodic_measurement(ambient_pressure);
 
   return status;
 }

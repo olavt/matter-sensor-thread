@@ -1,10 +1,3 @@
-/*
- * MatterTemperature.h
- *
- *  Created on: May 4, 2025
- *      Author: olavt
- */
-
 #pragma once
 
 #include "TemperatureSensor.h"
@@ -15,12 +8,14 @@
 
 using namespace chip;
 
-class MatterTemperature
+// A Temperature Sensor device reports measurements of temperature.
+
+class MatterTemperatureSensor
 {
 
 public:
 
-  MatterTemperature(chip::EndpointId temperatureEndpointId, std::shared_ptr<TemperatureSensor> temperatureSensor);
+  MatterTemperatureSensor(chip::EndpointId temperatureEndpointId, std::shared_ptr<TemperatureSensor> temperatureSensor);
 
   void UpdateMeasurements();
 

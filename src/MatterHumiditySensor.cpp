@@ -1,10 +1,3 @@
-/*
- * MatterHumidity.cpp
- *
- *  Created on: May 4, 2025
- *      Author: olavt
- */
-
 #include <cmath>
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <MatterHumiditySensor.h>

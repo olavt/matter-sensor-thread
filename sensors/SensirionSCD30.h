@@ -21,11 +21,15 @@ public:
     // Read all supported measurements
     std::vector<AirQualitySensor::Measurement> ReadAllMeasurements() override;
 
+    int ActivateAutomaticSelfCalibration() override;
+
     // Start continuous measurement mode
     int StartContinuousMeasurement() override;
 
+    int SetAmbientPressure(float ambientPressureKiloPascal) override;
+
 protected:
     // Set sensor altitude
-    int SetSensorAltitude(float altitude) override;
+    int SetAltitude(float altitude) override;
 
 };
