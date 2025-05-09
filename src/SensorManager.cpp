@@ -18,6 +18,7 @@
 #include "AirQualitySensor.h"
 #include "CO2Sensor.h"
 #include "SensirionSCD30.h"
+#include "SensirionSEN66.h"
 
 using namespace chip;
 using namespace chip::app;
@@ -39,7 +40,6 @@ std::unique_ptr<MatterHumiditySensor> matterHumidity;
 std::unique_ptr<MatterLightSensor> matterLightSensor;
 std::unique_ptr<MatterPressureSensor> matterPressureSensor;
 std::unique_ptr<MatterAirQualitySensor> matterAirQuality;
-
 
 namespace SensorManager
 {
@@ -64,8 +64,16 @@ CHIP_ERROR Init()
     ambientLightSensor = std::make_shared<VEML6035AmbientLightSensor>();
     ambientLightSensor->Init();
 
-    auto airQualitySensor = std::make_shared<SensirionSCD30>(610.0);
+    //auto airQualitySensor = std::make_shared<SensirionSCD30>(610.0);
+    auto airQualitySensor = std::make_shared<SensirionSEN66>(610.0);
     airQualitySensor->Init();
+
+    int firmwareMajorVersion;
+    int firmwareMinorVersion;
+
+    airQualitySensor->GetFirmwareVersion(&firmwareMajorVersion, &firmwareMinorVersion);
+
+    SILABS_LOG("Air Quality Sensor firmware version %d.%d.", firmwareMajorVersion, firmwareMinorVersion);
 
     //microphone.Init();
 
