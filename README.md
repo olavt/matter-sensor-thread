@@ -741,6 +741,27 @@ Set the ClusterRevision attribute to the default value 3.
 
 Now Build the project
 
+## Add support for Air Quality Sensor using a Sensirion SEN66 sensor
+
+### Connect the hardware
+
+![SEN66 pin assignment](./images/sen66-pin-assignment.png)
+
+The recommended voltage is 3.3V.
+
+![EFR32xG24 Dev Kit Pin Layout](./images/efr32xg24-devkitc-1-pin-layout.png)
+
+### Connecting the SEN66 sensor
+
+- Connecting the SEN66 air quality sensor
+
+| EFR32xG24 Dev Kit Pin  | SEN66 Pin |
+|------------------------|-----------|
+| GND - EXP1             | GND       |
+| EXP2 - VMCU            | VCC       |
+| EXP16 - I2C_SDA - PC05 | SDA       |
+| PC04 - I2C_SCL - EXP15 | SCL       |
+
 ## Obtain Thread Dataset from a joined device
 
 ![Launch Console](./images/launch-console.png)
