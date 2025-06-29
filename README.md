@@ -5,7 +5,7 @@
 
 This article shows how to modify the "Matter - SoC Sensor over Thread" example project with support for some of the sensors found on the Silicon Labs EFR32xG24 Dev Kit Board.
 
-This article is based on Simplicity SDK Suite v2024.12.0 with Silicon Labs Matter 2.5.0 extensions (based on Matter version 1.4).
+This article is based on Simplicity SDK Suite v2025.6.0 with Silicon Labs Matter 2.6.0 extensions (based on Matter version 1.4.1).
 
 ![Silicon Labs EFR32xG24 Dev Kit Board](./images/xg24-dk2601b.png)
 
@@ -15,7 +15,7 @@ This article is based on Simplicity SDK Suite v2024.12.0 with Silicon Labs Matte
 - Install Simplicity Studio V5 from Silicon Labs.
 - Silicon Labs EFR32xG24 Dev Kit Board (BRD2601B).
 
-This article assumes that you have already installed Simplicity Studio V5 and the Simplicity SDK Suite v2024.12.0 and Silicon Labs Matter 2.5.0.
+This article assumes that you have already installed Simplicity Studio V5 and the Simplicity SDK Suite v2025.6.0 and Silicon Labs Matter 2.6.0.
 
 ## Enable long paths / filenames
 
